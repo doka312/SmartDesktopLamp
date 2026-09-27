@@ -150,24 +150,69 @@ class EffectSim {
   }
 }
 
-const previews = [];   // {el, dots, sim, slotIndex, last}
+/* Превью рисуются в <canvas>: одна картинка на плитку вместо восьми меняющихся
+   элементов. Так браузеру не нужно пересчитывать стили страницы на каждом кадре
+   (особенно заметно в Safari). Невидимые превью не анимируются. */
+const PREVIEW_LEDS = 8;
+const previews = [];   // {canvas, ctx, sim, slotIndex, last, lastId, visible, dirty}
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-function animatePreviews(t) {
+const previewObserver = "IntersectionObserver" in window
+  ? new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        const p = previews.find((x) => x.canvas === e.target);
+        if (p) { p.visible = e.isIntersecting; if (p.visible) wakePreviews(); }
+      }
+    })
+  : null;
+
+function drawPreview(p) {
+  const { ctx, canvas } = p;
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  const step = w / PREVIEW_LEDS, cy = h / 2, r = Math.min(step, h) * 0.2;
+  p.sim.leds.forEach((c, i) => {
+    const cx = step * (i + 0.5);
+    const [R, G, B] = c.map((v) => Math.max(0, Math.min(255, v | 0)));
+    const lum = (R + G + B) / 765;
+    if (lum > 0.03) {                           // мягкое свечение вокруг огонька
+      const g = ctx.createRadialGradient(cx, cy, r * 0.6, cx, cy, r * 2.6);
+      g.addColorStop(0, `rgba(${R},${G},${B},${0.55 * Math.min(1, lum * 2)})`);
+      g.addColorStop(1, `rgba(${R},${G},${B},0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(cx - r * 2.6, cy - r * 2.6, r * 5.2, r * 5.2);
+    }
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = lum > 0.01 ? `rgb(${R},${G},${B})` : "#000";
+    ctx.fill();
+  });
+}
+
+let previewLoop = 0;
+function wakePreviews() {
+  if (!previewLoop && !document.hidden) previewLoop = requestAnimationFrame(animatePreviews);
+}
+function animatePreviews(time) {
+  previewLoop = 0;
+  let keepGoing = false;
   for (const p of previews) {
     const id = state.effects ? state.slots[p.slotIndex] : 0;
     const info = EFFECTS_INFO[id] || { sim: "runningRainbow", ms: 30 };
-    if (p.lastId !== id) { p.sim = new EffectSim(p.dots.length); p.lastId = id; }
-    if (t - p.last < info.ms) continue;
-    p.last = t;
+    if (p.lastId !== id) { p.sim = new EffectSim(PREVIEW_LEDS); p.lastId = id; p.dirty = true; p.last = 0; }
+    const animated = info.sim !== "none" && !reduceMotion;
+    if (!p.visible && !p.dirty) continue;
+    if (animated && p.visible) keepGoing = true;
+    if (!p.dirty && (!animated || time - p.last < info.ms)) continue;
+    p.last = time;
     p.sim.step(info.sim, TRIGGER_SLOTS[p.slotIndex]);
-    p.dots.forEach((d, i) => {
-      const c = rgbCss(p.sim.leds[i]);
-      d.style.background = c;
-      d.style.boxShadow = `0 0 8px ${c}`;
-    });
+    drawPreview(p);
+    p.dirty = false;
   }
-  if (!reduceMotion) requestAnimationFrame(animatePreviews);
+  if (keepGoing) previewLoop = requestAnimationFrame(animatePreviews);
 }
+document.addEventListener("visibilitychange", wakePreviews);
+
+function markPreviewsDirty() { previews.forEach((p) => (p.dirty = true)); wakePreviews(); }
 
 /* ─── Скриншоты: показываем заглушку, если файла ещё нет ───────── */
 function watchShot(img) {
@@ -182,11 +227,27 @@ function watchShot(img) {
 function setEffects(on) {
   state.effects = on;
   $$('input[name="mode"]').forEach((r) => (r.checked = r.value === (on ? "1" : "0")));
-  $("#step-effects").classList.toggle("disabled", !on);
+  const section = $("#step-effects");
+  section.classList.toggle("disabled", !on);
+  section.classList.toggle("is-basic", !on);
   $("#effects-off").hidden = on;
+  $("#btn-fx-toggle").hidden = on;
+  // С эффектами раздел всегда открыт; для базовой лампы — свёрнут
+  setEffectsOpen(on);
   document.body.classList.toggle("fx-on", on);
   renderTilesSummary();
-  redrawStatic();
+  markPreviewsDirty();
+}
+
+function setEffectsOpen(open) {
+  const body = $("#effects-body");
+  body.classList.toggle("closed", !open);
+  body.inert = !open;
+  const btn = $("#btn-fx-toggle");
+  btn.setAttribute("aria-expanded", String(open));
+  $("span", btn).textContent = t(open ? "fx.collapse" : "fx.expand");
+  $("#step-effects").classList.toggle("is-collapsed", !open);
+  if (open) markPreviewsDirty();
 }
 
 function setLeds(n) {
@@ -213,8 +274,10 @@ function effectDesc(id) {
 
 function renderSlots() {
   const wrap = $("#slots");
-  wrap.innerHTML = "";
+  previews.forEach((p) => previewObserver?.unobserve(p.canvas));
   previews.length = 0;
+  wrap.innerHTML = "";
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
   TRIGGER_SLOTS.forEach((slot, i) => {
     const el = document.createElement("div");
     el.className = "slot";
@@ -227,31 +290,40 @@ function renderSlots() {
         </div>
       </div>
       <figure class="shot">
-        <img src="${slot.img}" alt="${escapeHtml(t("slot.alt", { n: i + 1 }))}" loading="lazy">
+        <img src="${slot.img}" alt="${escapeHtml(t("slot.alt", { n: i + 1 }))}" loading="lazy" decoding="async">
         <figcaption class="shot-placeholder">
           <span class="ph-icon" aria-hidden="true">📱</span>
           <span>${t("slot.ph", { n: i + 1 })}</span>
           <code>docs/${slot.img}</code>
         </figcaption>
       </figure>
-      <div class="preview" aria-hidden="true">${"<i></i>".repeat(8)}</div>
-      <div class="fx-list" role="radiogroup" aria-label="${escapeHtml(t("slot.aria", { n: i + 1 }))}">
-        ${effectList().map((id) => `
-          <label class="fx-opt">
-            <input type="radio" name="slot${i}" value="${id}" ${state.slots[i] === id ? "checked" : ""}>
-            <span><span class="fx-name">${escapeHtml(effectName(id))}</span><span class="fx-desc">${escapeHtml(effectDesc(id))}</span></span>
-          </label>`).join("")}
-      </div>`;
+      <canvas class="preview" aria-hidden="true"></canvas>
+      <div class="fx-select">
+        <select id="slot-fx-${i}" aria-label="${escapeHtml(t("slot.aria", { n: i + 1 }))}">
+          ${effectList().map((id) => `<option value="${id}" ${state.slots[i] === id ? "selected" : ""}>${escapeHtml(effectName(id))}</option>`).join("")}
+        </select>
+      </div>
+      <p class="fx-desc">${escapeHtml(effectDesc(state.slots[i]))}</p>`;
     wrap.appendChild(el);
     watchShot($("img", el));
-    $$(`input[name="slot${i}"]`, el).forEach((r) =>
-      r.addEventListener("change", () => { state.slots[i] = Number(r.value); renderTilesSummary(); redrawStatic(); }));
-    previews.push({ el, dots: $$(".preview i", el), slotIndex: i, last: 0, lastId: null, sim: null });
+
+    const select = $("select", el);
+    select.addEventListener("change", () => {
+      state.slots[i] = Number(select.value);
+      $(".fx-desc", el).textContent = effectDesc(state.slots[i]);
+      renderTilesSummary();
+      markPreviewsDirty();
+    });
+
+    const canvas = $("canvas", el);
+    canvas.width = 240 * dpr;
+    canvas.height = 36 * dpr;
+    const p = { canvas, ctx: canvas.getContext("2d"), slotIndex: i, last: 0, lastId: null, sim: null, visible: !previewObserver, dirty: true };
+    previews.push(p);
+    previewObserver?.observe(canvas);
   });
-  redrawStatic();
+  wakePreviews();
 }
-let fakeT = 0;
-function redrawStatic() { if (reduceMotion) animatePreviews((fakeT += 1e6)); }
 
 function renderTilesSummary() {
   const ul = $("#tiles-summary");
@@ -853,6 +925,7 @@ function applyLang(next) {
   if (state.homeStatus) setHomeStatus(state.homeStatus.key, state.homeStatus.vars, state.homeStatus.ok);
   $$("#stages li").forEach((li) => { li.textContent = t("stage." + li.dataset.stage); });
   if (state.ownCode) validateOwnCode();
+  $("#btn-fx-toggle span").textContent = t($("#effects-body").classList.contains("closed") ? "fx.expand" : "fx.collapse");
   renderFwInfo();
   renderSlots();
   renderTilesSummary();
@@ -873,6 +946,7 @@ function init() {
 
   $$('input[name="mode"]').forEach((r) => r.addEventListener("change", () => setEffects(r.value === "1")));
   $("#btn-enable-fx").addEventListener("click", () => setEffects(true));
+  $("#btn-fx-toggle").addEventListener("click", () => setEffectsOpen($("#effects-body").classList.contains("closed")));
   $("#leds-num").addEventListener("input", (e) => { if (e.target.value !== "") setLeds(e.target.value); });
   $("#leds-num").addEventListener("blur", (e) => { e.target.value = state.leds; });
 
@@ -895,6 +969,14 @@ function init() {
 
   window.addEventListener("beforeunload", (e) => { if (state.busy) { e.preventDefault(); e.returnValue = ""; } });
 
+  // Декоративные анимации работают только когда их видно
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) e.target.classList.toggle("offscreen", !e.isIntersecting);
+    });
+    $$(".hero-photo, #btn-install").forEach((el) => io.observe(el));
+  }
+
   $$(".shot img").forEach(watchShot);
   watchShot($(".hero-photo img"));
   setLeds(DEFAULT_LEDS);
@@ -902,7 +984,7 @@ function init() {
   setCodeMode("random");
   applyLang(lang);
   loadManifest();
-  requestAnimationFrame(animatePreviews);
+  wakePreviews();
 }
 
 init();

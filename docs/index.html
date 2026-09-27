@@ -41,20 +41,17 @@
   <figure class="hero-photo">
     <img src="img/hero.jpg" data-i18n-attr="alt:hero.photoAlt" alt="Лампа на тумбочке у кровати мягко освещает комнату" fetchpriority="high">
     <figcaption class="hero-placeholder" aria-hidden="true">
-      <svg viewBox="0 0 220 240" class="lamp-svg">
+      <span class="ph-glow"></span>
+      <svg viewBox="0 0 220 240" class="ph-beam">
         <defs>
-          <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#FFD08A" stop-opacity=".95"/>
-            <stop offset="55%" stop-color="#FFB25B" stop-opacity=".35"/>
-            <stop offset="100%" stop-color="#FFB25B" stop-opacity="0"/>
-          </radialGradient>
           <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stop-color="#FFD08A" stop-opacity=".6"/>
             <stop offset="100%" stop-color="#FFD08A" stop-opacity="0"/>
           </linearGradient>
         </defs>
-        <circle class="lamp-glow" cx="110" cy="100" r="100" fill="url(#glow)"/>
-        <path class="lamp-beam" d="M72 104 L148 104 L196 222 L24 222 Z" fill="url(#beam)"/>
+        <path d="M72 104 L148 104 L196 222 L24 222 Z" fill="url(#beam)"/>
+      </svg>
+      <svg viewBox="0 0 220 240" class="ph-lamp">
         <rect x="70" y="208" width="80" height="16" rx="8" fill="#8C6246"/>
         <rect x="104" y="112" width="12" height="100" rx="6" fill="#8C6246"/>
         <path d="M64 104 Q64 46 110 40 Q156 46 156 104 Z" fill="#D98A42" stroke="#B86A26" stroke-width="3"/>
@@ -164,27 +161,38 @@
   <section class="step card" id="step-effects">
     <div class="step-head">
       <span class="step-num">2</span>
-      <div>
+      <div class="step-head-text">
         <h2 data-i18n="s2.title">Эффекты</h2>
-        <p class="hint" data-i18n="s2.hint">В приложении «Дом» у лампы есть готовые плитки с цветами. Три из них мы превратим в «кнопки» эффектов: нажали плитку, и&nbsp;заиграла анимация.</p>
+        <p class="hint fx-hint" data-i18n="s2.hint">В приложении «Дом» у лампы есть готовые плитки с цветами. Три из них мы превратим в «кнопки» эффектов: нажали плитку, и&nbsp;заиграла анимация.</p>
+        <p class="hint basic-note" data-i18n="s2.basicNote">В базовой лампе эффектов нет. Раскройте раздел, если захотите их включить.</p>
+      </div>
+      <button type="button" class="collapse-btn" id="btn-fx-toggle" aria-expanded="true" aria-controls="effects-body" hidden>
+        <span>Показать</span>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 6l4.5 4.5L12.5 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="collapse" id="effects-body">
+      <div class="collapse-inner">
+        <div class="effects-off" id="effects-off" hidden>
+          <p data-i18n="fxoff.text">Вы выбрали <b>базовую</b> лампу, эффектов в ней нет. Эти плитки будут просто включать свой цвет.</p>
+          <button type="button" class="btn primary small" id="btn-enable-fx" data-i18n="fxoff.btn">Включить эффекты</button>
+        </div>
+
+        <div class="fx-content">
+          <figure class="shot shot-wide">
+            <img src="img/palette.png" data-i18n-attr="alt:palette.alt" alt="Где в приложении «Дом» найти плитки с цветами" loading="lazy" decoding="async">
+            <figcaption class="shot-placeholder">
+              <span class="ph-icon" aria-hidden="true">📱</span>
+              <span data-i18n="palette.ph">Место для скриншота: где найти плитки цветов в&nbsp;«Доме»</span>
+              <code>docs/img/palette.png</code>
+            </figcaption>
+          </figure>
+
+          <div class="slots" id="slots"></div>
+        </div>
       </div>
     </div>
-
-    <div class="effects-off" id="effects-off" hidden>
-      <p data-i18n="fxoff.text">Вы выбрали <b>базовую</b> лампу, эффектов в ней нет. Эти плитки будут просто включать свой цвет.</p>
-      <button type="button" class="btn ghost small" id="btn-enable-fx" data-i18n="fxoff.btn">Включить эффекты</button>
-    </div>
-
-    <figure class="shot shot-wide">
-      <img src="img/palette.png" data-i18n-attr="alt:palette.alt" alt="Где в приложении «Дом» найти плитки с цветами" loading="lazy">
-      <figcaption class="shot-placeholder">
-        <span class="ph-icon" aria-hidden="true">📱</span>
-        <span data-i18n="palette.ph">Место для скриншота: где найти плитки цветов в&nbsp;«Доме»</span>
-        <code>docs/img/palette.png</code>
-      </figcaption>
-    </figure>
-
-    <div class="slots" id="slots"></div>
   </section>
 
   <!-- ШАГ 3 -->

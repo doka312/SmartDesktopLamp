@@ -69,6 +69,12 @@ export const T = {
     "You chose the <b>basic</b> lamp, so there are no effects. These tiles will simply switch on their color.",
   ],
   "fxoff.btn": ["Включить эффекты", "Turn effects on"],
+  "s2.basicNote": [
+    "В базовой лампе эффектов нет. Раскройте раздел, если захотите их включить.",
+    "The basic lamp has no effects. Expand this section if you’d like to turn them on.",
+  ],
+  "fx.expand": ["Показать", "Show"],
+  "fx.collapse": ["Свернуть", "Hide"],
   "palette.alt": ["Где в приложении «Дом» найти плитки с цветами", "Where to find the color tiles in the Home app"],
   "palette.ph": ["Место для скриншота: где найти плитки цветов в&nbsp;«Доме»", "Place for a screenshot: where to find the color tiles in Home"],
   "slot.title": ["Плитка {n}", "Tile {n}"],
