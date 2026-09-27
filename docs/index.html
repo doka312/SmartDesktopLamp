@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Установка лампы</title>
+  <meta name="description" content="Установка и настройка умной настольной лампы прямо из браузера: прошивка, Wi‑Fi, эффекты и код для приложения «Дом».">
+  <meta name="theme-color" content="#FBF5EC" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1C1410" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='30' r='26' fill='%23FFD9A0' opacity='.55'/%3E%3Cpath d='M18 30h28L40 12H24z' fill='%23E08A3C'/%3E%3Crect x='30' y='30' width='4' height='20' fill='%236B4A35'/%3E%3Crect x='20' y='50' width='24' height='6' rx='3' fill='%236B4A35'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <span class="brand">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="30" r="26" fill="var(--glow-core)" opacity=".55"/><path d="M18 30h28L40 12H24z" fill="var(--accent)"/><rect x="30" y="30" width="4" height="20" fill="var(--wood)"/><rect x="20" y="50" width="24" height="6" rx="3" fill="var(--wood)"/></svg>
+    Smart Desktop Lamp
+  </span>
+  <div class="lang-switch" role="group" data-i18n-attr="aria-label:lang.aria" aria-label="Язык сайта">
+    <button type="button" data-lang="ru" aria-pressed="true" lang="ru">RU</button>
+    <button type="button" data-lang="en" aria-pressed="false" lang="en">EN</button>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-text">
+    <p class="eyebrow" data-i18n="hero.eyebrow">Умная настольная лампа</p>
+    <h1 data-i18n="hero.title">Установка за&nbsp;пять минут, прямо в&nbsp;браузере</h1>
+    <p class="lead" data-i18n="hero.lead">Выберите, какой будет ваша лампа, укажите Wi‑Fi и&nbsp;нажмите одну кнопку. Программы устанавливать не нужно, достаточно USB‑кабеля.</p>
+    <ul class="chips">
+      <li><span aria-hidden="true">⏱</span> <span data-i18n="hero.chip1">около 5 минут</span></li>
+      <li><span aria-hidden="true">🔌</span> <span data-i18n="hero.chip2">USB‑кабель</span></li>
+      <li><span aria-hidden="true">🏠</span> <span data-i18n="hero.chip3">приложение «Дом»</span></li>
+    </ul>
+  </div>
+
+  <figure class="hero-photo">
+    <img src="img/hero.jpg" data-i18n-attr="alt:hero.photoAlt" alt="Лампа на тумбочке у кровати мягко освещает комнату" fetchpriority="high">
+    <figcaption class="hero-placeholder" aria-hidden="true">
+      <svg viewBox="0 0 220 240" class="lamp-svg">
+        <defs>
+          <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#FFD08A" stop-opacity=".95"/>
+            <stop offset="55%" stop-color="#FFB25B" stop-opacity=".35"/>
+            <stop offset="100%" stop-color="#FFB25B" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FFD08A" stop-opacity=".6"/>
+            <stop offset="100%" stop-color="#FFD08A" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <circle class="lamp-glow" cx="110" cy="100" r="100" fill="url(#glow)"/>
+        <path class="lamp-beam" d="M72 104 L148 104 L196 222 L24 222 Z" fill="url(#beam)"/>
+        <rect x="70" y="208" width="80" height="16" rx="8" fill="#8C6246"/>
+        <rect x="104" y="112" width="12" height="100" rx="6" fill="#8C6246"/>
+        <path d="M64 104 Q64 46 110 40 Q156 46 156 104 Z" fill="#D98A42" stroke="#B86A26" stroke-width="3"/>
+        <g class="lamp-leds">
+          <circle cx="80" cy="104" r="5"/><circle cx="92" cy="104" r="5"/><circle cx="104" cy="104" r="5"/>
+          <circle cx="116" cy="104" r="5"/><circle cx="128" cy="104" r="5"/><circle cx="140" cy="104" r="5"/>
+        </g>
+      </svg>
+      <span class="ph-tag"><span data-i18n="hero.photoPh">Место для фото лампы, 4:3</span> · <code>docs/img/hero.jpg</code></span>
+    </figcaption>
+  </figure>
+</header>
+
+<div id="browser-warning" class="banner warn" hidden data-i18n="warn.browser">
+  <strong>Этот браузер не умеет работать с USB.</strong> Откройте страницу на компьютере в&nbsp;<b>Google Chrome</b> или <b>Microsoft Edge</b>. Safari, Firefox и&nbsp;телефоны пока не подходят.
+</div>
+
+<main>
+
+  <aside class="already card soft">
+    <div>
+      <strong data-i18n="already.title">Лампа уже настроена раньше?</strong>
+      <p data-i18n="already.text">Подключите её по USB, и мы подставим текущие настройки, чтобы вы поменяли только нужное.</p>
+    </div>
+    <button type="button" class="btn ghost" id="btn-read" data-i18n="already.btn">Загрузить настройки с лампы</button>
+    <p class="read-status" id="read-status" role="status"></p>
+  </aside>
+
+  <!-- ШАГ 1 -->
+  <section class="step card" id="step-mode">
+    <div class="step-head">
+      <span class="step-num">1</span>
+      <div>
+        <h2 data-i18n="s1.title">Какой будет ваша лампа</h2>
+        <p class="hint" data-i18n="s1.hint">Режим можно поменять в любой момент, снова зайдя на эту страницу.</p>
+      </div>
+    </div>
+
+    <div class="mode-cards" role="radiogroup" data-i18n-attr="aria-label:mode.aria" aria-label="Режим лампы">
+      <label class="mode-card">
+        <input type="radio" name="mode" value="0">
+        <span class="mode-icon" aria-hidden="true">💡</span>
+        <span class="mode-title" data-i18n="mode.basic.title">Базовая</span>
+        <span class="mode-desc" data-i18n="mode.basic.desc">Любой цвет и&nbsp;яркость, плавные переходы, кнопка вкл/выкл.</span>
+      </label>
+      <label class="mode-card">
+        <input type="radio" name="mode" value="1" checked>
+        <span class="mode-icon" aria-hidden="true">✨</span>
+        <span class="mode-title" data-i18n="mode.fx.title">С эффектами</span>
+        <span class="mode-desc" data-i18n="mode.fx.desc">Всё то же, плюс три цвета в&nbsp;«Доме» включают анимации: сияние, огоньки, радугу.</span>
+        <span class="badge" data-i18n="mode.badge">рекомендуем</span>
+      </label>
+    </div>
+
+    <div class="leds-field">
+      <div class="field">
+        <label for="leds-num" class="label" data-i18n="leds.label">Сколько светодиодов на ленте</label>
+        <input type="number" id="leds-num" min="3" max="64" step="1" value="8" inputmode="numeric">
+        <span class="muted">3 – 64</span>
+      </div>
+      <figure class="led-figure">
+        <svg viewBox="0 0 320 112" role="img" data-i18n-attr="aria-label:leds.alt" aria-label="Кусок светодиодной ленты с тремя светодиодами 5050">
+          <defs>
+            <radialGradient id="lens" cx="50%" cy="45%" r="60%">
+              <stop offset="0%" stop-color="#FFFFFF"/>
+              <stop offset="70%" stop-color="#FFF4D6"/>
+              <stop offset="100%" stop-color="#EADFC2"/>
+            </radialGradient>
+            <g id="led5050">
+              <rect x="-24" y="-24" width="48" height="48" rx="4" fill="#F6F3EC" stroke="#D6CDB9" stroke-width="1.5"/>
+              <path d="M-24 -14 L-14 -24" stroke="#C9BFA8" stroke-width="2"/>
+              <circle r="18" fill="url(#lens)" stroke="#DCCFAF" stroke-width="1.5"/>
+              <rect x="-7" y="-9" width="14" height="10" rx="1.5" fill="#3A3330"/>
+              <rect x="-9" y="4" width="4" height="4" rx="1" fill="#E5533D"/>
+              <rect x="-2" y="4" width="4" height="4" rx="1" fill="#4CAF62"/>
+              <rect x="5" y="4" width="4" height="4" rx="1" fill="#3F7FE0"/>
+              <rect x="-27" y="-18" width="4" height="7" rx="1" fill="#D2A25A"/>
+              <rect x="-27" y="11" width="4" height="7" rx="1" fill="#D2A25A"/>
+              <rect x="23" y="-18" width="4" height="7" rx="1" fill="#D2A25A"/>
+              <rect x="23" y="11" width="4" height="7" rx="1" fill="#D2A25A"/>
+            </g>
+          </defs>
+          <rect x="0" y="44" width="320" height="64" rx="8" fill="#211C19"/>
+          <line x1="0" y1="56" x2="320" y2="56" stroke="#3A322C" stroke-width="2"/>
+          <line x1="0" y1="96" x2="320" y2="96" stroke="#3A322C" stroke-width="2"/>
+          <g fill="#C9964A">
+            <rect x="100" y="60" width="10" height="7" rx="1.5"/><rect x="100" y="73" width="10" height="7" rx="1.5"/><rect x="100" y="86" width="10" height="7" rx="1.5"/>
+            <rect x="210" y="60" width="10" height="7" rx="1.5"/><rect x="210" y="73" width="10" height="7" rx="1.5"/><rect x="210" y="86" width="10" height="7" rx="1.5"/>
+          </g>
+          <line x1="105" y1="48" x2="105" y2="104" stroke="#8A7F75" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="215" y1="48" x2="215" y2="104" stroke="#8A7F75" stroke-width="1" stroke-dasharray="3 3"/>
+          <use href="#led5050" x="50" y="76"/>
+          <use href="#led5050" x="160" y="76"/>
+          <use href="#led5050" x="270" y="76"/>
+          <g class="led-count" font-family="Nunito, system-ui, sans-serif" font-weight="900" font-size="15" text-anchor="middle">
+            <circle cx="50" cy="18" r="13"/><text x="50" y="23">1</text>
+            <circle cx="160" cy="18" r="13"/><text x="160" y="23">2</text>
+            <circle cx="270" cy="18" r="13"/><text x="270" y="23">3</text>
+          </g>
+        </svg>
+        <figcaption class="muted" data-i18n="leds.caption">Светодиод 5050: считайте такие квадратики</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ШАГ 2 -->
+  <section class="step card" id="step-effects">
+    <div class="step-head">
+      <span class="step-num">2</span>
+      <div>
+        <h2 data-i18n="s2.title">Эффекты</h2>
+        <p class="hint" data-i18n="s2.hint">В приложении «Дом» у лампы есть готовые плитки с цветами. Три из них мы превратим в «кнопки» эффектов: нажали плитку, и&nbsp;заиграла анимация.</p>
+      </div>
+    </div>
+
+    <div class="effects-off" id="effects-off" hidden>
+      <p data-i18n="fxoff.text">Вы выбрали <b>базовую</b> лампу, эффектов в ней нет. Эти плитки будут просто включать свой цвет.</p>
+      <button type="button" class="btn ghost small" id="btn-enable-fx" data-i18n="fxoff.btn">Включить эффекты</button>
+    </div>
+
+    <figure class="shot shot-wide">
+      <img src="img/palette.png" data-i18n-attr="alt:palette.alt" alt="Где в приложении «Дом» найти плитки с цветами" loading="lazy">
+      <figcaption class="shot-placeholder">
+        <span class="ph-icon" aria-hidden="true">📱</span>
+        <span data-i18n="palette.ph">Место для скриншота: где найти плитки цветов в&nbsp;«Доме»</span>
+        <code>docs/img/palette.png</code>
+      </figcaption>
+    </figure>
+
+    <div class="slots" id="slots"></div>
+  </section>
+
+  <!-- ШАГ 3 -->
+  <section class="step card" id="step-wifi">
+    <div class="step-head">
+      <span class="step-num">3</span>
+      <div>
+        <h2 data-i18n="s3.title">Домашний Wi‑Fi</h2>
+        <p class="hint" data-i18n="s3.hint">Лампа подключается к Wi‑Fi, чтобы iPhone мог ею управлять.</p>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="ssid" class="label" data-i18n="wifi.ssid">Название сети</label>
+      <input type="text" id="ssid" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="32" data-i18n-attr="placeholder:wifi.ssidPh" placeholder="Например, MyHome">
+    </div>
+    <div class="field">
+      <label for="pass" class="label" data-i18n="wifi.pass">Пароль</label>
+      <div class="pass-row">
+        <input type="password" id="pass" autocomplete="off" maxlength="64" data-i18n-attr="placeholder:wifi.passPh" placeholder="Пароль от Wi‑Fi">
+        <button type="button" class="btn ghost small" id="btn-showpass" aria-pressed="false">Показать</button>
+      </div>
+    </div>
+    <p class="hint" id="wifi-keep-hint" hidden><span data-i18n="wifi.keepA">Лампа уже подключена к сети</span> <b id="wifi-current"></b><span data-i18n="wifi.keepB">. Оставьте поля пустыми, чтобы ничего не менять.</span></p>
+
+    <div class="note">
+      <span aria-hidden="true">📶</span>
+      <p data-i18n="wifi.note24">Лампа работает только с&nbsp;сетью <b>2,4&nbsp;ГГц</b>. Если роутер раздаёт две сети, выберите ту, в&nbsp;названии которой нет «5G».</p>
+    </div>
+    <div class="note">
+      <span aria-hidden="true">🔒</span>
+      <p data-i18n="wifi.notePrivacy">Пароль уходит прямо в&nbsp;лампу по кабелю. Эта страница его никуда не отправляет и&nbsp;не сохраняет.</p>
+    </div>
+  </section>
+
+  <!-- ШАГ 4 -->
+  <section class="step card" id="step-code">
+    <div class="step-head">
+      <span class="step-num">4</span>
+      <div>
+        <h2 data-i18n="s4.title">Код для приложения «Дом»</h2>
+        <p class="hint" data-i18n="s4.hint">Восемь цифр, которые iPhone попросит при добавлении лампы. Это как пароль для первой встречи.</p>
+      </div>
+    </div>
+
+    <div class="segmented" role="radiogroup" data-i18n-attr="aria-label:code.aria" aria-label="Как задать код">
+      <label><input type="radio" name="codemode" value="random" checked><span data-i18n="code.random">Придумать за меня</span></label>
+      <label><input type="radio" name="codemode" value="own"><span data-i18n="code.own">Ввести свой</span></label>
+      <label id="codemode-keep-wrap" hidden><input type="radio" name="codemode" value="keep"><span data-i18n="code.keep">Оставить текущий</span></label>
+    </div>
+
+    <div class="code-box" id="code-random">
+      <output class="code-display" id="code-display">— — —</output>
+      <button type="button" class="btn ghost small" id="btn-regen" data-i18n="code.regen">🎲 Другой код</button>
+    </div>
+
+    <div class="field" id="code-own" hidden>
+      <label for="code-input" class="label" data-i18n="code.ownLabel">Ваш код (8 цифр)</label>
+      <input type="text" id="code-input" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="123-45-678">
+      <p class="field-msg" id="code-msg" role="alert"></p>
+    </div>
+
+    <div class="code-box" id="code-keep" hidden>
+      <output class="code-display" id="code-keep-display"></output>
+    </div>
+
+    <p class="hint" data-i18n="code.rules">Apple не принимает слишком простые коды: восемь одинаковых цифр, <code>12345678</code> и&nbsp;<code>87654321</code>. Запишите код, а&nbsp;в&nbsp;конце мы покажем его ещё раз вместе с&nbsp;QR‑кодом.</p>
+  </section>
+
+  <!-- ШАГ 5 -->
+  <section class="step card" id="step-install">
+    <div class="step-head">
+      <span class="step-num">5</span>
+      <div>
+        <h2 data-i18n="s5.title">Установка</h2>
+        <p class="hint" id="fw-info">Проверяем, какая прошивка доступна…</p>
+      </div>
+    </div>
+
+    <ol class="checklist">
+      <li data-i18n="s5.check1">Подключите лампу к&nbsp;компьютеру USB‑кабелем. Кабель должен передавать данные: некоторые кабели от зарядок умеют только заряжать.</li>
+      <li data-i18n="s5.check2">Нажмите большую кнопку ниже. Браузер покажет окно со списком: выберите в&nbsp;нём <b>USB JTAG/serial debug unit</b> (или похожее) и&nbsp;нажмите <b>«Подключиться»</b>.</li>
+      <li data-i18n="s5.check3">Не отключайте кабель, пока не появится надпись «Готово».</li>
+    </ol>
+
+    <div class="install-choice" role="radiogroup" data-i18n-attr="aria-label:act.aria" aria-label="Что сделать">
+      <label class="choice">
+        <input type="radio" name="action" value="flash" checked>
+        <span><b data-i18n="act.flash.title">Установить прошивку и&nbsp;настройки</b><small data-i18n="act.flash.sub">Для новой лампы или для обновления прошивки</small></span>
+      </label>
+      <label class="choice">
+        <input type="radio" name="action" value="settings">
+        <span><b data-i18n="act.settings.title">Только обновить настройки</b><small data-i18n="act.settings.sub">Прошивка уже стоит, меняем Wi‑Fi, эффекты или код</small></span>
+      </label>
+    </div>
+
+    <details class="advanced">
+      <summary data-i18n="adv.summary">Дополнительно</summary>
+      <label class="check">
+        <input type="checkbox" id="erase-all">
+        <span data-i18n="adv.erase">Полностью стереть память лампы перед установкой.<br><small>Лампу придётся заново добавить в&nbsp;«Дом». Нужно, только если что-то совсем сломалось.</small></span>
+      </label>
+    </details>
+
+    <div class="form-errors" id="form-errors" role="alert" hidden></div>
+
+    <button type="button" class="btn primary big" id="btn-install">
+      <span class="btn-glow" aria-hidden="true"></span>
+      <span id="btn-install-label">Подключить и установить</span>
+    </button>
+
+    <div class="progress-wrap" id="progress" hidden>
+      <ol class="stages" id="stages"></ol>
+      <div class="bar" aria-hidden="true"><div class="bar-fill" id="bar-fill"></div></div>
+      <p class="progress-text" id="progress-text" role="status" aria-live="polite"></p>
+      <button type="button" class="btn ghost" id="btn-repick" hidden data-i18n="btn.repick">Выбрать лампу ещё раз</button>
+    </div>
+
+    <div class="banner err" id="install-error" hidden></div>
+
+    <details class="log">
+      <summary data-i18n="log.summary">Технический журнал</summary>
+      <pre id="log"></pre>
+    </details>
+  </section>
+
+  <!-- ШАГ 6 -->
+  <section class="step card" id="step-home">
+    <div class="step-head">
+      <span class="step-num">6</span>
+      <div>
+        <h2 data-i18n="s6.title">Добавьте лампу в «Дом»</h2>
+        <p class="hint" id="home-hint">Этот шаг пригодится после установки.</p>
+      </div>
+    </div>
+
+    <div class="status-line" id="wifi-status" hidden></div>
+
+    <div class="home-grid">
+      <div class="qr-card">
+        <div class="qr" id="qr" data-i18n-attr="aria-label:qr.aria" aria-label="QR-код для добавления в «Дом»"></div>
+        <output class="code-display small" id="final-code"></output>
+        <p class="hint center" data-i18n="qr.hint">Наведите камеру iPhone на&nbsp;QR‑код или введите цифры вручную.</p>
+      </div>
+      <ol class="home-steps">
+        <li data-i18n="home.1">Откройте приложение <b>«Дом»</b> на iPhone. Телефон должен быть в&nbsp;той же сети Wi‑Fi, что и&nbsp;лампа.</li>
+        <li data-i18n="home.2">Нажмите <b>«+»</b>, затем <b>«Добавить аксессуар»</b>.</li>
+        <li data-i18n="home.3">Отсканируйте QR‑код. Если не получается, нажмите <b>«Другие параметры…»</b> и&nbsp;выберите <b>Smart RGB Lamp</b>.</li>
+        <li data-i18n="home.4">iPhone предупредит, что аксессуар не сертифицирован. Нажмите <b>«Все равно добавить»</b>: так и&nbsp;должно быть у&nbsp;самодельных устройств.</li>
+        <li data-i18n="home.5">Если попросит код, введите восемь цифр слева.</li>
+      </ol>
+    </div>
+
+    <div class="tiles-reminder" id="tiles-reminder">
+      <h3 data-i18n="tiles.title">Как включить эффект</h3>
+      <p data-i18n="tiles.text">Откройте лампу в&nbsp;«Доме», нажмите на&nbsp;цвет и&nbsp;выберите одну из&nbsp;плиток:</p>
+      <ul id="tiles-summary"></ul>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq">
+    <h2 data-i18n="faq.title">Если что-то не получилось</h2>
+    <details><summary data-i18n="faq.q1">Лампы нет в списке, когда браузер просит выбрать устройство</summary><p data-i18n="faq.a1"></p></details>
+    <details><summary data-i18n="faq.q2">Лампа не подключается к Wi‑Fi</summary><p data-i18n="faq.a2"></p></details>
+    <details><summary data-i18n="faq.q3">Хочу поменять эффекты или Wi‑Fi потом</summary><p data-i18n="faq.a3"></p></details>
+    <details><summary data-i18n="faq.q4">Лампа была в «Доме», а я установил прошивку заново</summary><p data-i18n="faq.a4"></p></details>
+    <details><summary data-i18n="faq.q5">«Дом» пишет, что аксессуар уже добавлен или не отвечает</summary><p data-i18n="faq.a5"></p></details>
+    <details><summary data-i18n="faq.q6">Какой браузер нужен</summary><p data-i18n="faq.a6"></p></details>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>Smart Desktop Lamp · <a href="https://github.com/ANDyouNo/SmartDesktopLamp" data-i18n="footer.src">исходный код на GitHub</a></p>
+  <p class="muted" id="footer-fw"></p>
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

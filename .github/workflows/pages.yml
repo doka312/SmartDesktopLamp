@@ -1,0 +1,93 @@
+# Собирает прошивку и публикует страницу установки на GitHub Pages.
+# Один раз включите: Settings → Pages → Build and deployment → Source: «GitHub Actions».
+name: Build firmware & publish installer
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  ESP32_CORE: "3.3.12"
+  HOMESPAN: "2.1.8"
+  FASTLED: "3.10.5"
+  FQBN: "esp32:esp32:lolin_c3_mini:PartitionScheme=huge_app,CDCOnBoot=default"
+  SKETCH: firmware/SmartDesktopLamp
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: arduino/setup-arduino-cli@v2
+
+      - name: Cache Arduino cores
+        uses: actions/cache@v4
+        with:
+          path: ~/.arduino15
+          key: arduino-${{ env.ESP32_CORE }}-${{ env.HOMESPAN }}-${{ env.FASTLED }}
+
+      - name: Install ESP32 core and libraries
+        run: |
+          arduino-cli config init --overwrite
+          arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install "esp32:esp32@${ESP32_CORE}"
+          arduino-cli lib install "HomeSpan@${HOMESPAN}" "FastLED@${FASTLED}"
+
+      - name: Compile firmware
+        run: arduino-cli compile --fqbn "$FQBN" --output-dir build "$SKETCH"
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site/firmware
+          cp -r docs/. _site/
+          NAME=$(basename "$SKETCH")
+          cp "build/${NAME}.ino.bootloader.bin"  _site/firmware/bootloader.bin
+          cp "build/${NAME}.ino.partitions.bin"  _site/firmware/partitions.bin
+          cp "build/${NAME}.ino.bin"             _site/firmware/firmware.bin
+          cp "$(find ~/.arduino15/packages/esp32/hardware/esp32 -name boot_app0.bin | head -n1)" _site/firmware/boot_app0.bin
+          VERSION=$(grep -oP '#define\s+FW_VERSION\s+"\K[^"]+' "$SKETCH/${NAME}.ino")
+          cat > _site/firmware/manifest.json <<EOF
+          {
+            "name": "Smart Desktop Lamp",
+            "version": "${VERSION}",
+            "build": "${GITHUB_SHA::7}",
+            "date": "$(date -u +%Y-%m-%d)",
+            "chip": "ESP32-C3",
+            "parts": [
+              { "path": "bootloader.bin", "offset": 0 },
+              { "path": "partitions.bin", "offset": 32768 },
+              { "path": "boot_app0.bin",  "offset": 57344 },
+              { "path": "firmware.bin",   "offset": 65536 }
+            ]
+          }
+          EOF
+          cat _site/firmware/manifest.json
+          ls -la _site/firmware
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

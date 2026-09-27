@@ -16,6 +16,56 @@ A smart RGB desk lamp with HomeKit integration, featuring smooth color transitio
 - 📱 Native Apple Home app integration
 - ⚡ ESP32-C3 powered
 
+## 🌐 Browser installer (recommended)
+
+The easiest way to set up a lamp is the web installer on GitHub Pages: **https://andyouno.github.io/SmartDesktopLamp/**
+
+Open it in Chrome or Edge on a computer, connect the lamp via USB and pick:
+
+- **Mode**: basic lamp or lamp with effects
+- **LED count**: 3 to 64
+- **Effects**: which of the 5 effects each of the 3 reserved Home-app color tiles starts
+- **Wi-Fi**: network name and password (sent to the lamp over USB only)
+- **HomeKit pairing code**: random or your own; codes Apple rejects are blocked
+
+The page is available in Russian and English (switch in the top-right corner; it also follows the browser language and `?lang=en`).
+It flashes the firmware and sends the settings in one go, then shows the pairing code and a QR code for the Home app.
+Settings live in the lamp's memory, so you can change them later without reflashing ("Only update settings").
+
+### How it works
+
+| Path | What |
+|------|------|
+| `firmware/SmartDesktopLamp/` | Unified firmware. Settings are stored in NVS and received over USB serial. |
+| `firmware/SmartDesktopLamp/effects.h` | Effect table. See below for adding an effect. |
+| `docs/` | The installer page (plain HTML/CSS/JS, no build step). |
+| `docs/i18n.js` | All site texts, each as `[Russian, English]`. |
+| `docs/img/` | Hero photo and screenshots of the Home-app tiles (see `docs/img/README.md`). |
+| `.github/workflows/pages.yml` | Builds the firmware with arduino-cli and publishes `docs/` + binaries to GitHub Pages. |
+
+**One-time setup:** in the repository go to *Settings → Pages → Build and deployment → Source* and choose **GitHub Actions**.
+After that every push to `main` rebuilds the firmware and updates the site.
+
+### Adding an effect
+
+1. In `firmware/SmartDesktopLamp/effects.h` write a function `void myEffect(FxCtx &c)` that draws one frame into `c.leds[0..c.n-1]` using brightness `c.bright`.
+2. Add a line to the `EFFECTS` table with a **new unique id** (never reuse or renumber existing ids).
+3. Optionally add names/descriptions (`fx.<id>.name`, `fx.<id>.desc`) to `docs/i18n.js` and a preview animation to `EFFECTS_INFO` in `docs/app.js`. Without it the site still lists the effect using the name reported by the lamp.
+
+### Serial protocol (for the curious)
+
+The firmware reads lines on USB serial (115200). Lines starting with `$` are handled by the lamp; everything else goes to the regular HomeSpan CLI.
+
+```
+$HELLO                  -> $LAMP fw=.. effects=.. leds=.. s1=.. s2=.. s3=.. code=.. ssid=..   $FX <id> <name> ...   $END
+$SET <key> <value>      -> $OK <key> | $ERR <key> <reason>     keys: effects leds s1 s2 s3 code ssid pass (values URL-encoded)
+$SAVE                   -> $SAVED, then reboot
+$REBOOT, $FACTORY
+Events: $READY, $WIFI ok ip=..., $PAIRED 1|0
+```
+
+The legacy sketches `LampFirmareBase.ino` and `LampFirmwareEffects.ino` below are kept for manual Arduino IDE builds.
+
 ## Hardware Requirements
 
 - **ESP32-C3** microcontroller (LOLIN C3 MINI or compatible)
