@@ -7,8 +7,11 @@
 //       Она рисует один кадр в c.leds[0 .. c.n-1] с учётом яркости c.bright (0..1).
 //    2. Добавьте строку в таблицу EFFECTS внизу файла, дав эффекту
 //       НОВЫЙ уникальный id (старые id не меняйте — они сохранены в лампах).
-//    3. (по желанию) Добавьте описание и картинку в docs/app.js → EFFECTS_INFO.
+//    3. (по желанию) Добавьте название в docs/i18n.js и превью в docs/app.js → EFFECTS_INFO.
 //       Даже без этого сайт покажет эффект: он получает список прямо из лампы.
+//
+//  Эффект может принимать цвет, выбранный на сайте (c.hue, 0..255 как в FastLED).
+//  Для этого поставьте true в последнем столбце таблицы — сайт покажет выбор цвета.
 ////////////////////////////////////////////////////////////////////////////
 
 #include <FastLED.h>
@@ -17,6 +20,7 @@ struct FxCtx {
   CRGB   *leds;     // лента
   uint8_t n;        // сколько светодиодов реально подключено
   float   bright;   // текущая яркость 0..1 (плавно меняется при вкл/выкл)
+  uint8_t hue;      // цвет, выбранный на сайте для этой плитки (для эффектов с цветом)
 };
 
 static inline CRGB fxScale(const CRGB &c, float b) {
@@ -38,14 +42,14 @@ namespace fx {
     }
   }
 
-  // Северное сияние (зелёно-бирюзовые волны)
+  // Сияние: волны вокруг выбранного цвета (±25 по оттенку). 115 — классическое зелёно-бирюзовое.
   static void aurora(FxCtx &c) {
     static uint16_t p1 = 0, p2 = 0;
     for (int i = 0; i < c.n; i++) {
       uint8_t b1 = sin8(p1 + i * 20);
       uint8_t b2 = sin8(p2 + i * 35);
       uint8_t bright = (b1 + b2) / 2;
-      uint8_t hue = map(sin8(p1 / 4 + i * 10), 0, 255, 90, 140);
+      uint8_t hue = c.hue - 25 + scale8(sin8(p1 / 4 + i * 10), 50);
       c.leds[i] = fxScale(CHSV(hue, 200, bright), c.bright);
     }
     p1 += 3;
@@ -94,17 +98,18 @@ struct EffectDef {
   void      (*render)(FxCtx &); // функция отрисовки кадра
   uint16_t    intervalMs;       // пауза между кадрами
   float       fixedBrightness;  // >0 — эффект всегда на этой яркости; 0 — яркость из «Дома»
+  bool        usesColor;        // true — на сайте можно выбрать цвет (передаётся в c.hue)
 };
 
 // ─── ТАБЛИЦА ЭФФЕКТОВ ─────────────────────────────────────────────────────
 static const EffectDef EFFECTS[] = {
-  // id  название              функция              мс   яркость
-  {  1, "Colorful Twinkle",   fx::colorfulTwinkle,  30,  0.6f },
-  {  2, "Aurora",             fx::aurora,           35,  0.0f },
-  {  3, "Twinkle",            fx::twinkle,          50,  0.6f },
-  {  4, "Running Rainbow",    fx::runningRainbow,   30,  0.0f },
-  {  5, "Static Rainbow",     fx::staticRainbow,    30,  0.0f },
-  // { 6, "My Effect",        fx::myEffect,         30,  0.0f },
+  // id  название              функция              мс   яркость  цвет
+  {  1, "Colorful Twinkle",   fx::colorfulTwinkle,  30,  0.6f,   false },
+  {  2, "Aurora",             fx::aurora,           35,  0.0f,   true  },
+  {  3, "Twinkle",            fx::twinkle,          50,  0.6f,   false },
+  {  4, "Running Rainbow",    fx::runningRainbow,   30,  0.0f,   false },
+  {  5, "Static Rainbow",     fx::staticRainbow,    30,  0.0f,   false },
+  // { 6, "My Effect",        fx::myEffect,         30,  0.0f,   false },
 };
 static const uint8_t EFFECT_COUNT = sizeof(EFFECTS) / sizeof(EFFECTS[0]);
 

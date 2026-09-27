@@ -14,7 +14,7 @@
 #include <Preferences.h>
 #include "effects.h"
 
-#define FW_VERSION   "4.0.0"
+#define FW_VERSION   "4.1.0"
 
 // Железо — одинаковое у всех
 #define LED_PIN      9
@@ -33,6 +33,7 @@ static const TriggerColor TRIGGERS[NUM_SLOTS] = {
   {  17.0f, 7 },   // плитка 3
 };
 static const uint8_t DEFAULT_SLOT_FX[NUM_SLOTS] = { 1, 2, 3 };
+static const uint8_t DEFAULT_SLOT_HUE = 115;   // зелёно-бирюзовый — классическое сияние
 
 ////////////////////////////////////////////
 // Настройки
@@ -41,6 +42,7 @@ struct LampConfig {
   bool    effectsEnabled = true;
   uint8_t numLeds = DEFAULT_LEDS;
   uint8_t slotFx[NUM_SLOTS] = { DEFAULT_SLOT_FX[0], DEFAULT_SLOT_FX[1], DEFAULT_SLOT_FX[2] };
+  uint8_t slotHue[NUM_SLOTS] = { DEFAULT_SLOT_HUE, DEFAULT_SLOT_HUE, DEFAULT_SLOT_HUE };
   char    code[9] = "";      // код сопряжения, заданный с сайта
   char    ssid[33] = "";     // только для показа на сайте; сам пароль хранит HomeSpan
 };
@@ -56,6 +58,8 @@ void loadConfig() {
   for (int i = 0; i < NUM_SLOTS; i++) {
     char key[8]; snprintf(key, sizeof(key), "slot%d", i);
     cfg.slotFx[i] = prefs.getUChar(key, DEFAULT_SLOT_FX[i]);
+    snprintf(key, sizeof(key), "hue%d", i);
+    cfg.slotHue[i] = prefs.getUChar(key, DEFAULT_SLOT_HUE);
   }
   prefs.getString("code", cfg.code, sizeof(cfg.code));
   prefs.getString("ssid", cfg.ssid, sizeof(cfg.ssid));
@@ -69,6 +73,8 @@ void saveConfig(const LampConfig &c) {
   for (int i = 0; i < NUM_SLOTS; i++) {
     char key[8]; snprintf(key, sizeof(key), "slot%d", i);
     prefs.putUChar(key, c.slotFx[i]);
+    snprintf(key, sizeof(key), "hue%d", i);
+    prefs.putUChar(key, c.slotHue[i]);
   }
   prefs.putString("code", c.code);
   prefs.putString("ssid", c.ssid);
@@ -104,6 +110,7 @@ struct RGBLightbulb : Service::LightBulb {
   CRGB currentBaseColor = CRGB::Black;
   CRGB targetBaseColor = CRGB::White;
   const EffectDef *currentEffect = nullptr;
+  uint8_t currentHue = DEFAULT_SLOT_HUE;   // цвет плитки, запустившей эффект
 
   unsigned long lastUpdateTime = 0;
   unsigned long lastRenderTime = 0;
@@ -144,12 +151,15 @@ struct RGBLightbulb : Service::LightBulb {
     return CRGB(gammaCorrect((r + m) * 255.0f), gammaCorrect((g + m) * 255.0f), gammaCorrect((b + m) * 255.0f));
   }
 
-  // Какой эффект запускает выбранный в «Доме» цвет (nullptr — просто цвет)
-  const EffectDef *detectEffect(float h, int s, int v) {
+  // Какой эффект запускает выбранный в «Доме» цвет (nullptr — просто цвет).
+  // В slotOut возвращает номер плитки, чтобы взять её цвет.
+  const EffectDef *detectEffect(float h, int s, int v, int *slotOut) {
     if (!cfg.effectsEnabled || v < 1) return nullptr;
     for (int i = 0; i < NUM_SLOTS; i++) {
-      if (fabs(h - TRIGGERS[i].hue) <= 1.0f && abs(s - TRIGGERS[i].sat) <= 1)
+      if (fabs(h - TRIGGERS[i].hue) <= 1.0f && abs(s - TRIGGERS[i].sat) <= 1) {
+        *slotOut = i;
         return findEffect(cfg.slotFx[i]);
+      }
     }
     return nullptr;
   }
@@ -160,9 +170,11 @@ struct RGBLightbulb : Service::LightBulb {
       return;
     }
     targetBrightness = (v <= 1) ? 0.02f : v / 100.0f;
-    const EffectDef *fx = detectEffect(h, s, v);
+    int slot = 0;
+    const EffectDef *fx = detectEffect(h, s, v, &slot);
     if (fx) {
       currentEffect = fx;
+      currentHue = cfg.slotHue[slot];
       if (fx->fixedBrightness > 0) targetBrightness = fx->fixedBrightness;
       Serial.printf("Effect: %s\n", fx->name);
     } else {
@@ -207,7 +219,7 @@ struct RGBLightbulb : Service::LightBulb {
       if (now - lastRenderTime >= interval) {
         lastRenderTime = now;
         if (currentEffect) {
-          FxCtx c{ leds, cfg.numLeds, currentBrightness };
+          FxCtx c{ leds, cfg.numLeds, currentBrightness, currentHue };
           currentEffect->render(c);
         } else {
           fill_solid(leds, cfg.numLeds, CRGB(currentBaseColor.r * currentBrightness,
@@ -243,7 +255,8 @@ struct RGBLightbulb : Service::LightBulb {
 //  Все строки заканчиваются '\n'. Значения кодируются как в URL (%20 и т.п.).
 //    $HELLO                → $LAMP ...,  $FX <id> <name> ...,  $END
 //    $SET <ключ> <значение> → $OK <ключ>  |  $ERR <ключ> <причина>
-//        ключи: effects(0/1) leds(3..64) s1 s2 s3(id эффекта, 0=нет) code ssid pass
+//        ключи: effects(0/1) leds(3..64) s1 s2 s3(id эффекта, 0=нет)
+//               c1 c2 c3(цвет плитки 0..255, для эффектов с цветом) code ssid pass
 //    $SAVE                 → $SAVED, затем перезагрузка
 //    $REBOOT, $FACTORY
 //  Любая строка без '$' передаётся в обычную консоль HomeSpan.
@@ -280,6 +293,11 @@ void printPct(const char *s) {
 void sendHello() {
   Serial.printf("\n$LAMP fw=%s effects=%d leds=%d", FW_VERSION, cfg.effectsEnabled, cfg.numLeds);
   for (int i = 0; i < NUM_SLOTS; i++) Serial.printf(" s%d=%d", i + 1, cfg.slotFx[i]);
+  for (int i = 0; i < NUM_SLOTS; i++) Serial.printf(" c%d=%d", i + 1, cfg.slotHue[i]);
+  Serial.print(" colorfx=");                     // какие эффекты принимают цвет
+  bool first = true;
+  for (uint8_t i = 0; i < EFFECT_COUNT; i++)
+    if (EFFECTS[i].usesColor) { Serial.printf(first ? "%d" : ",%d", EFFECTS[i].id); first = false; }
   Serial.printf(" slots=%d minleds=%d maxleds=%d wifi=%d code=%s ssid=", NUM_SLOTS, MIN_LEDS, MAX_LEDS, wifiConnected, cfg.code);
   printPct(cfg.ssid);
   Serial.println();
@@ -316,6 +334,12 @@ void handleSet(char *args) {
     if (slot < 0 || slot >= NUM_SLOTS) { Serial.printf("$ERR %s slot\n", key); return; }
     if (id != 0 && !findEffect(id)) { Serial.printf("$ERR %s unknown-effect\n", key); return; }
     pending.slotFx[slot] = id;
+  } else if (key[0] == 'c' && isdigit((unsigned char)key[1]) && key[2] == 0) {
+    int slot = key[1] - '1';
+    int hue = atoi(val);
+    if (slot < 0 || slot >= NUM_SLOTS) { Serial.printf("$ERR %s slot\n", key); return; }
+    if (hue < 0 || hue > 255) { Serial.printf("$ERR %s range\n", key); return; }
+    pending.slotHue[slot] = hue;
   } else if (!strcmp(key, "code")) {
     if (!pairingCodeAllowed(val)) { Serial.printf("$ERR %s not-allowed\n", key); return; }
     strlcpy(pending.code, val, sizeof(pending.code));

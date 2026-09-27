@@ -19,14 +19,28 @@ const DEFAULT_SLOT_FX = [1, 2, 3];
 // Анимации превью эффектов. id совпадают с таблицей EFFECTS в effects.h.
 // Названия и описания лежат в i18n.js (ключи fx.<id>.name / fx.<id>.desc).
 // Если лампа сообщит эффект, которого здесь нет, сайт покажет его название из прошивки.
+// color: true — у эффекта можно выбрать цвет (как usesColor в effects.h)
 const EFFECTS_INFO = {
   0: { sim: "none",            ms: 100 },
   1: { sim: "colorfulTwinkle", ms: 30 },
-  2: { sim: "aurora",          ms: 35 },
+  2: { sim: "aurora",          ms: 35, color: true },
   3: { sim: "twinkle",         ms: 50 },
   4: { sim: "runningRainbow",  ms: 30 },
   5: { sim: "staticRainbow",   ms: 30 },
 };
+
+// Цвета для эффектов с выбором цвета. hue — оттенок 0..255 как в FastLED,
+// эффект «гуляет» вокруг него на ±25. Названия — в i18n.js (color.<key>).
+const COLOR_PRESETS = [
+  { key: "aurora", hue: 115 },   // классическое зелёно-бирюзовое сияние
+  { key: "blue",   hue: 160 },
+  { key: "violet", hue: 190 },
+  { key: "pink",   hue: 224 },
+  { key: "red",    hue: 0 },
+  { key: "orange", hue: 22 },
+  { key: "gold",   hue: 45 },
+];
+const DEFAULT_SLOT_HUE = 115;
 
 const MIN_LEDS = 3, MAX_LEDS = 64, DEFAULT_LEDS = 8;
 const HAP_SETUP_ID = "LAMP";   // homeSpan.setQRID(...)
@@ -59,6 +73,8 @@ const state = {
   effects: true,
   leds: DEFAULT_LEDS,
   slots: [...DEFAULT_SLOT_FX],
+  slotHues: TRIGGER_SLOTS.map(() => DEFAULT_SLOT_HUE),
+  deviceColorFx: null, // какие эффекты с цветом (из прошивки); null — берём из EFFECTS_INFO
   codeMode: "random",
   randomCode: "",
   ownCode: "",
@@ -109,7 +125,7 @@ function slotSwatch(slot) {
 /* ─── Имитация эффектов для превью ──────────────────────────────── */
 class EffectSim {
   constructor(n) { this.n = n; this.leds = Array.from({ length: n }, () => [0, 0, 0]); this.p1 = 0; this.p2 = 0; this.hue = 0; }
-  step(kind, slot) {
+  step(kind, slot, center = DEFAULT_SLOT_HUE) {
     const L = this.leds;
     switch (kind) {
       case "colorfulTwinkle":
@@ -129,7 +145,7 @@ class EffectSim {
         for (let i = 0; i < this.n; i++) {
           const bright = (sin8(this.p1 + i * 20) + sin8(this.p2 + i * 35)) / 2;
           const hue = kind === "aurora"
-            ? 90 + (sin8(this.p1 / 4 + i * 10) / 255) * 50
+            ? center - 25 + (sin8(this.p1 / 4 + i * 10) / 255) * 50
             : sin8(this.p1 / 4 + i * 30);
           this.leds[i] = hsv8(hue, kind === "aurora" ? 200 : 220, bright);
         }
@@ -156,6 +172,21 @@ class EffectSim {
 const PREVIEW_LEDS = 8;
 const previews = [];   // {canvas, ctx, sim, slotIndex, last, lastId, visible, dirty}
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Размер картинки подгоняем под реальный размер элемента, иначе огоньки растягиваются в овалы
+const previewResizer = "ResizeObserver" in window
+  ? new ResizeObserver((entries) => {
+      for (const e of entries) {
+        const p = previews.find((x) => x.canvas === e.target);
+        if (p) { sizeCanvas(p.canvas); p.dirty = true; }
+      }
+      wakePreviews();
+    })
+  : null;
+function sizeCanvas(canvas) {
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const w = Math.round(canvas.clientWidth * dpr), h = Math.round(canvas.clientHeight * dpr);
+  if (w && h && (canvas.width !== w || canvas.height !== h)) { canvas.width = w; canvas.height = h; }
+}
 const previewObserver = "IntersectionObserver" in window
   ? new IntersectionObserver((entries) => {
       for (const e of entries) {
@@ -169,9 +200,11 @@ function drawPreview(p) {
   const { ctx, canvas } = p;
   const w = canvas.width, h = canvas.height;
   ctx.clearRect(0, 0, w, h);
-  const step = w / PREVIEW_LEDS, cy = h / 2, r = Math.min(step, h) * 0.2;
+  if (!w || !h) return;
+  const pad = h * 0.25;                          // поля слева и справа
+  const step = (w - pad * 2) / PREVIEW_LEDS, cy = h / 2, r = Math.min(step, h) * 0.2;
   p.sim.leds.forEach((c, i) => {
-    const cx = step * (i + 0.5);
+    const cx = pad + step * (i + 0.5);
     const [R, G, B] = c.map((v) => Math.max(0, Math.min(255, v | 0)));
     const lum = (R + G + B) / 765;
     if (lum > 0.03) {                           // мягкое свечение вокруг огонька
@@ -204,7 +237,7 @@ function animatePreviews(time) {
     if (animated && p.visible) keepGoing = true;
     if (!p.dirty && (!animated || time - p.last < info.ms)) continue;
     p.last = time;
-    p.sim.step(info.sim, TRIGGER_SLOTS[p.slotIndex]);
+    p.sim.step(info.sim, TRIGGER_SLOTS[p.slotIndex], state.slotHues[p.slotIndex]);
     drawPreview(p);
     p.dirty = false;
   }
@@ -272,12 +305,46 @@ function effectDesc(id) {
   return T[`fx.${id}.desc`] ? t(`fx.${id}.desc`) : t("fx.unknownDesc");
 }
 
+function effectHasColor(id) {
+  if (state.deviceColorFx) return state.deviceColorFx.includes(id);
+  return !!EFFECTS_INFO[id]?.color;
+}
+function colorName(hue) {
+  const preset = COLOR_PRESETS.find((c) => c.hue === hue);
+  return preset ? t(`color.${preset.key}`) : t("color.custom");
+}
+// Кружок цвета: градиент по диапазону, в котором «гуляет» эффект
+function colorSwatchCss(hue) {
+  return `linear-gradient(135deg, ${rgbCss(hsv8(hue - 25, 200, 255))}, ${rgbCss(hsv8(hue, 200, 255))} 50%, ${rgbCss(hsv8(hue + 25, 200, 255))})`;
+}
+function renderColorRow(el, i) {
+  const row = $(".fx-colors", el);
+  const show = effectHasColor(state.slots[i]);
+  row.hidden = !show;
+  if (!show) return;
+  const hues = COLOR_PRESETS.map((c) => c.hue);
+  if (!hues.includes(state.slotHues[i])) hues.push(state.slotHues[i]);   // цвет с лампы не из списка
+  row.innerHTML = `<span class="fx-colors-label">${t("color.label")}: <b>${escapeHtml(colorName(state.slotHues[i]))}</b></span>
+    <div class="fx-colors-list" role="radiogroup" aria-label="${escapeHtml(t("color.aria", { n: i + 1 }))}">
+      ${hues.map((h) => `<button type="button" class="color-chip" role="radio" aria-checked="${h === state.slotHues[i]}"
+        data-hue="${h}" title="${escapeHtml(colorName(h))}" aria-label="${escapeHtml(colorName(h))}"
+        style="background:${colorSwatchCss(h)}"></button>`).join("")}
+    </div>
+    ${state.device && state.device.c1 === undefined ? `<span class="fx-colors-note">${t("color.needFw")}</span>` : ""}`;
+  $$(".color-chip", row).forEach((b) => b.addEventListener("click", () => {
+    state.slotHues[i] = Number(b.dataset.hue);
+    renderColorRow(el, i);
+    $(`.color-chip[data-hue="${b.dataset.hue}"]`, row)?.focus();
+    renderTilesSummary();
+    markPreviewsDirty();
+  }));
+}
+
 function renderSlots() {
   const wrap = $("#slots");
-  previews.forEach((p) => previewObserver?.unobserve(p.canvas));
+  previews.forEach((p) => { previewObserver?.unobserve(p.canvas); previewResizer?.unobserve(p.canvas); });
   previews.length = 0;
   wrap.innerHTML = "";
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
   TRIGGER_SLOTS.forEach((slot, i) => {
     const el = document.createElement("div");
     el.className = "slot";
@@ -303,24 +370,27 @@ function renderSlots() {
           ${effectList().map((id) => `<option value="${id}" ${state.slots[i] === id ? "selected" : ""}>${escapeHtml(effectName(id))}</option>`).join("")}
         </select>
       </div>
-      <p class="fx-desc">${escapeHtml(effectDesc(state.slots[i]))}</p>`;
+      <p class="fx-desc">${escapeHtml(effectDesc(state.slots[i]))}</p>
+      <div class="fx-colors"></div>`;
     wrap.appendChild(el);
     watchShot($("img", el));
+    renderColorRow(el, i);
 
     const select = $("select", el);
     select.addEventListener("change", () => {
       state.slots[i] = Number(select.value);
       $(".fx-desc", el).textContent = effectDesc(state.slots[i]);
+      renderColorRow(el, i);
       renderTilesSummary();
       markPreviewsDirty();
     });
 
     const canvas = $("canvas", el);
-    canvas.width = 240 * dpr;
-    canvas.height = 36 * dpr;
+    sizeCanvas(canvas);
     const p = { canvas, ctx: canvas.getContext("2d"), slotIndex: i, last: 0, lastId: null, sim: null, visible: !previewObserver, dirty: true };
     previews.push(p);
     previewObserver?.observe(canvas);
+    previewResizer?.observe(canvas);
   });
   wakePreviews();
 }
@@ -329,8 +399,9 @@ function renderTilesSummary() {
   const ul = $("#tiles-summary");
   ul.innerHTML = TRIGGER_SLOTS.map((slot, i) => {
     const id = state.effects ? state.slots[i] : 0;
+    const fx = escapeHtml(effectName(id)) + (effectHasColor(id) ? ` (${escapeHtml(colorName(state.slotHues[i]).toLowerCase())})` : "");
     return `<li><span class="swatch" style="background:${slotSwatch(slot)}"></span>
-      <span>${t("tiles.item", { n: i + 1, fx: escapeHtml(effectName(id)) })}</span></li>`;
+      <span>${t("tiles.item", { n: i + 1, fx })}</span></li>`;
   }).join("");
   $("#tiles-reminder").hidden = !state.effects;
 }
@@ -540,7 +611,12 @@ function applyDeviceInfo({ info, fx }) {
   state.deviceFx = fx;
   if (info.effects !== undefined) setEffects(info.effects === "1");
   if (info.leds) setLeds(info.leds);
-  TRIGGER_SLOTS.forEach((_, i) => { if (info[`s${i + 1}`] !== undefined) state.slots[i] = Number(info[`s${i + 1}`]); });
+  TRIGGER_SLOTS.forEach((_, i) => {
+    if (info[`s${i + 1}`] !== undefined) state.slots[i] = Number(info[`s${i + 1}`]);
+    if (info[`c${i + 1}`] !== undefined) state.slotHues[i] = Number(info[`c${i + 1}`]);
+  });
+  // Прошивка 4.1+ сообщает, какие эффекты принимают цвет
+  state.deviceColorFx = info.colorfx !== undefined ? info.colorfx.split(",").filter(Boolean).map(Number) : null;
   renderSlots();
   renderTilesSummary();
 
@@ -554,9 +630,20 @@ function applyDeviceInfo({ info, fx }) {
     $("#code-keep-display").textContent = fmtCode(info.code);
     setCodeMode("keep");
   }
-  const upToDate = state.manifest && info.fw === state.manifest.version;
+  const upToDate = state.manifest && compareVersions(info.fw, state.manifest.version) >= 0;
   setAction(upToDate || !state.manifest ? "settings" : "flash");
   return upToDate;
+}
+
+// "4.1.0" против "4.0.2": >0 — первая новее, 0 — одинаковые, <0 — старее
+function compareVersions(a = "0", b = "0") {
+  const pa = String(a).split(".").map((x) => parseInt(x, 10) || 0);
+  const pb = String(b).split(".").map((x) => parseInt(x, 10) || 0);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pa[i] || 0) - (pb[i] || 0);
+    if (d) return d;
+  }
+  return 0;
 }
 
 function setAction(a) {
@@ -651,12 +738,14 @@ function validate() {
   return errs.length === 0;
 }
 
-function buildCommands() {
+function buildCommands(lampInfo = {}) {
   const cmds = [
     ["effects", state.effects ? "1" : "0"],
     ["leds", String(state.leds)],
     ...TRIGGER_SLOTS.map((_, i) => [`s${i + 1}`, String(state.slots[i])]),
   ];
+  // Цвета эффектов понимает прошивка 4.1+ (она присылает c1=… в ответ на $HELLO)
+  if (lampInfo.c1 !== undefined) TRIGGER_SLOTS.forEach((_, i) => cmds.push([`c${i + 1}`, String(state.slotHues[i])]));
   const ssid = $("#ssid").value;
   if (ssid) {
     cmds.push(["ssid", ssid]);
@@ -804,7 +893,7 @@ async function install() {
     const hello = await conn.hello(action === "flash" ? 25000 : 10000);
     state.deviceFx = hello.fx;
 
-    const cmds = buildCommands();
+    const cmds = buildCommands(hello.info);
     for (let i = 0; i < cmds.length; i++) {
       const [key, value] = cmds[i];
       $("#progress-text").textContent = t("p.sending");

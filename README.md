@@ -49,7 +49,7 @@ After that every push to `main` rebuilds the firmware and updates the site.
 ### Adding an effect
 
 1. In `firmware/SmartDesktopLamp/effects.h` write a function `void myEffect(FxCtx &c)` that draws one frame into `c.leds[0..c.n-1]` using brightness `c.bright`.
-2. Add a line to the `EFFECTS` table with a **new unique id** (never reuse or renumber existing ids).
+2. Add a line to the `EFFECTS` table with a **new unique id** (never reuse or renumber existing ids). Set the last column to `true` if the effect should get a color picker on the site; the chosen color arrives in `c.hue` (0–255, FastLED hue).
 3. Optionally add names/descriptions (`fx.<id>.name`, `fx.<id>.desc`) to `docs/i18n.js` and a preview animation to `EFFECTS_INFO` in `docs/app.js`. Without it the site still lists the effect using the name reported by the lamp.
 
 ### Serial protocol (for the curious)
@@ -57,8 +57,8 @@ After that every push to `main` rebuilds the firmware and updates the site.
 The firmware reads lines on USB serial (115200). Lines starting with `$` are handled by the lamp; everything else goes to the regular HomeSpan CLI.
 
 ```
-$HELLO                  -> $LAMP fw=.. effects=.. leds=.. s1=.. s2=.. s3=.. code=.. ssid=..   $FX <id> <name> ...   $END
-$SET <key> <value>      -> $OK <key> | $ERR <key> <reason>     keys: effects leds s1 s2 s3 code ssid pass (values URL-encoded)
+$HELLO                  -> $LAMP fw=.. effects=.. leds=.. s1=.. s2=.. s3=.. c1=.. c2=.. c3=.. colorfx=.. code=.. ssid=..   $FX <id> <name> ...   $END
+$SET <key> <value>      -> $OK <key> | $ERR <key> <reason>     keys: effects leds s1 s2 s3 c1 c2 c3 code ssid pass (values URL-encoded)
 $SAVE                   -> $SAVED, then reboot
 $REBOOT, $FACTORY
 Events: $READY, $WIFI ok ip=..., $PAIRED 1|0
