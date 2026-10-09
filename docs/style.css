@@ -358,6 +358,10 @@ input.invalid { border-color: var(--err); }
   padding: 18px; color: var(--ink-soft); font-size: 14px; font-weight: 700;
 }
 .shot:not(.empty) { border-style: solid; }
+/* Настоящие скриншоты показываем целиком, в их собственных пропорциях */
+.slot .shot:not(.empty) { aspect-ratio: auto; }
+.slot .shot:not(.empty) img { height: auto; }
+.shot-wide:not(.empty) { border: 0; background: none; border-radius: 0; }
 .ph-icon { font-size: 28px; }
 .shot-placeholder code { font-size: 12px; }
 
