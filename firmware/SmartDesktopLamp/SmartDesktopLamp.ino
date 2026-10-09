@@ -14,7 +14,7 @@
 #include <Preferences.h>
 #include "effects.h"
 
-#define FW_VERSION   "4.1.0"
+#define FW_VERSION   "4.2.0"
 
 // Железо — одинаковое у всех
 #define LED_PIN      9
@@ -45,6 +45,7 @@ struct LampConfig {
   uint8_t slotHue[NUM_SLOTS] = { DEFAULT_SLOT_HUE, DEFAULT_SLOT_HUE, DEFAULT_SLOT_HUE };
   char    code[9] = "";      // код сопряжения, заданный с сайта
   char    ssid[33] = "";     // только для показа на сайте; сам пароль хранит HomeSpan
+  int8_t  txPower = 0;       // мощность Wi‑Fi в шагах по 0,25 дБм (как wifi_power_t); 0 — не трогать (максимум платы)
 };
 
 LampConfig cfg;
@@ -63,6 +64,7 @@ void loadConfig() {
   }
   prefs.getString("code", cfg.code, sizeof(cfg.code));
   prefs.getString("ssid", cfg.ssid, sizeof(cfg.ssid));
+  cfg.txPower = prefs.getChar("txp", 0);
   prefs.end();
 }
 
@@ -78,7 +80,41 @@ void saveConfig(const LampConfig &c) {
   }
   prefs.putString("code", c.code);
   prefs.putString("ssid", c.ssid);
+  prefs.putChar("txp", c.txPower);
   prefs.end();
+}
+
+////////////////////////////////////////////
+// Мощность передатчика Wi‑Fi
+//
+// Известный аппаратный дефект дешёвых плат ESP32-C3 SuperMini: бортовой
+// стабилизатор питания не держит пиковый ток (~500 мА) при передаче на полной
+// мощности (19,5 дБм по умолчанию). В момент отправки auth-фрейма питание
+// проседает — внешне это выглядит как AUTH_EXPIRE в цикле на любой точке доступа.
+// Официальный обходной путь (espressif/arduino-esp32 #6767) — снизить TX-мощность.
+// Значение выбирается на сайте; 0 — оставить как есть.
+////////////////////////////////////////////
+static const int8_t TX_POWER_ALLOWED[] = {
+  WIFI_POWER_MINUS_1dBm, WIFI_POWER_2dBm, WIFI_POWER_5dBm, WIFI_POWER_7dBm,
+  WIFI_POWER_8_5dBm, WIFI_POWER_11dBm, WIFI_POWER_13dBm, WIFI_POWER_15dBm,
+  WIFI_POWER_17dBm, WIFI_POWER_18_5dBm, WIFI_POWER_19dBm, WIFI_POWER_19_5dBm,
+};
+
+bool txPowerAllowed(int v) {
+  if (v == 0) return true;
+  for (int8_t a : TX_POWER_ALLOWED) if (a == v) return true;
+  return false;
+}
+
+// Подменяет WiFi.begin() у HomeSpan: мощность ставим до и сразу после старта,
+// чтобы она действовала уже при первой попытке авторизации.
+void lampWifiBegin(const char *ssid, const char *pwd) {
+  if (cfg.txPower) {
+    WiFi.mode(WIFI_STA);
+    WiFi.setTxPower((wifi_power_t)cfg.txPower);
+  }
+  WiFi.begin(ssid, pwd);
+  if (cfg.txPower) WiFi.setTxPower((wifi_power_t)cfg.txPower);
 }
 
 // Коды, которые Apple не принимает
@@ -256,7 +292,8 @@ struct RGBLightbulb : Service::LightBulb {
 //    $HELLO                → $LAMP ...,  $FX <id> <name> ...,  $END
 //    $SET <ключ> <значение> → $OK <ключ>  |  $ERR <ключ> <причина>
 //        ключи: effects(0/1) leds(3..64) s1 s2 s3(id эффекта, 0=нет)
-//               c1 c2 c3(цвет плитки 0..255, для эффектов с цветом) code ssid pass
+//               c1 c2 c3(цвет плитки 0..255, для эффектов с цветом)
+//               txp(мощность Wi‑Fi: 0 = как есть, иначе значение wifi_power_t) code ssid pass
 //    $SAVE                 → $SAVED, затем перезагрузка
 //    $REBOOT, $FACTORY
 //  Любая строка без '$' передаётся в обычную консоль HomeSpan.
@@ -298,7 +335,7 @@ void sendHello() {
   bool first = true;
   for (uint8_t i = 0; i < EFFECT_COUNT; i++)
     if (EFFECTS[i].usesColor) { Serial.printf(first ? "%d" : ",%d", EFFECTS[i].id); first = false; }
-  Serial.printf(" slots=%d minleds=%d maxleds=%d wifi=%d code=%s ssid=", NUM_SLOTS, MIN_LEDS, MAX_LEDS, wifiConnected, cfg.code);
+  Serial.printf(" slots=%d minleds=%d maxleds=%d wifi=%d txp=%d code=%s ssid=", NUM_SLOTS, MIN_LEDS, MAX_LEDS, wifiConnected, cfg.txPower, cfg.code);
   printPct(cfg.ssid);
   Serial.println();
   for (uint8_t i = 0; i < EFFECT_COUNT; i++) {
@@ -344,6 +381,10 @@ void handleSet(char *args) {
     if (!pairingCodeAllowed(val)) { Serial.printf("$ERR %s not-allowed\n", key); return; }
     strlcpy(pending.code, val, sizeof(pending.code));
     codeChanged = true;
+  } else if (!strcmp(key, "txp")) {
+    int v = atoi(val);
+    if (!txPowerAllowed(v)) { Serial.printf("$ERR %s range\n", key); return; }
+    pending.txPower = v;
   } else if (!strcmp(key, "ssid")) {
     if (strlen(val) == 0 || strlen(val) > 32) { Serial.printf("$ERR %s length\n", key); return; }
     strlcpy(pending.ssid, val, sizeof(pending.ssid));
@@ -436,6 +477,8 @@ void setup() {
   homeSpan.begin(Category::Lighting, "Smart RGB Lamp");
   homeSpan.setQRID("LAMP");
   homeSpan.setConnectionCallback(onConnected);
+  homeSpan.setWifiBegin(lampWifiBegin);
+  if (cfg.txPower) Serial.printf("Wi-Fi TX power limited to %.2f dBm\n", cfg.txPower / 4.0f);
   homeSpan.setPairCallback(onPaired);
 
   if (cfg.code[0]) {

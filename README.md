@@ -28,6 +28,10 @@ Open it in Chrome or Edge on a computer, connect the lamp via USB and pick:
 - **Wi-Fi**: network name and password (sent to the lamp over USB only)
 - **HomeKit pairing code**: random or your own; codes Apple rejects are blocked
 
+The site has two sections, switched at the top: **Build** (a step-by-step assembly guide with photos and the wiring diagram, `#build`) and **Install** (`#install`).
+
+If a cheap ESP32‑C3 board (e.g. SuperMini) can't join Wi‑Fi, step 3 has an optional **Wi‑Fi transmit power** setting (`txp`, firmware 4.2+). Lowering it works around a known brown-out of the board's voltage regulator at full TX power (see espressif/arduino-esp32 #6767).
+
 The page is available in Russian and English (switch in the top-right corner; it also follows the browser language and `?lang=en`).
 It flashes the firmware and sends the settings in one go, then shows the pairing code and a QR code for the Home app.
 Settings live in the lamp's memory, so you can change them later without reflashing ("Only update settings").
@@ -40,7 +44,8 @@ Settings live in the lamp's memory, so you can change them later without reflash
 | `firmware/SmartDesktopLamp/effects.h` | Effect table. See below for adding an effect. |
 | `docs/` | The installer page (plain HTML/CSS/JS, no build step). |
 | `docs/i18n.js` | All site texts, each as `[Russian, English]`. |
-| `docs/img/` | Hero photo and screenshots of the Home-app tiles (see `docs/img/README.md`). |
+| `docs/build.js` | Build guide: stages, photos, wiring table, photo viewer. |
+| `docs/img/` | Hero photo, build photos (`img/build/`) and screenshots of the Home-app tiles (see `docs/img/README.md`). |
 | `.github/workflows/pages.yml` | Builds the firmware with arduino-cli and publishes `docs/` + binaries to GitHub Pages. |
 
 **One-time setup:** in the repository go to *Settings → Pages → Build and deployment → Source* and choose **GitHub Actions**.
@@ -57,8 +62,8 @@ After that every push to `main` rebuilds the firmware and updates the site.
 The firmware reads lines on USB serial (115200). Lines starting with `$` are handled by the lamp; everything else goes to the regular HomeSpan CLI.
 
 ```
-$HELLO                  -> $LAMP fw=.. effects=.. leds=.. s1=.. s2=.. s3=.. c1=.. c2=.. c3=.. colorfx=.. code=.. ssid=..   $FX <id> <name> ...   $END
-$SET <key> <value>      -> $OK <key> | $ERR <key> <reason>     keys: effects leds s1 s2 s3 c1 c2 c3 code ssid pass (values URL-encoded)
+$HELLO                  -> $LAMP fw=.. effects=.. leds=.. s1=.. s2=.. s3=.. c1=.. c2=.. c3=.. colorfx=.. txp=.. code=.. ssid=..   $FX <id> <name> ...   $END
+$SET <key> <value>      -> $OK <key> | $ERR <key> <reason>     keys: effects leds s1 s2 s3 c1 c2 c3 txp code ssid pass (values URL-encoded)
 $SAVE                   -> $SAVED, then reboot
 $REBOOT, $FACTORY
 Events: $READY, $WIFI ok ip=..., $PAIRED 1|0

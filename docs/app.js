@@ -1,6 +1,7 @@
 import { ESPLoader, Transport } from "./vendor/esptool-js-0.7.0.js";
 import qrcode from "./vendor/qrcode-generator-2.0.4.mjs";
 import { T, LANGS } from "./i18n.js";
+import { createBuildPage } from "./build.js";
 
 /* ═══════════════════════════════════════════════════════════════════
    ОБЩИЕ С ПРОШИВКОЙ НАСТРОЙКИ
@@ -42,6 +43,11 @@ const COLOR_PRESETS = [
 ];
 const DEFAULT_SLOT_HUE = 115;
 
+// Мощность передатчика Wi‑Fi: значения wifi_power_t (шаги по 0,25 дБм), 0 — автоматически.
+// Должны совпадать с TX_POWER_ALLOWED в прошивке.
+const TX_POWER_OPTIONS = [0, 74, 68, 60, 52, 44, 34, 28, 20, 8, -4];
+const TX_POWER_RECOMMENDED = 34;   // 8,5 дБм
+
 const MIN_LEDS = 3, MAX_LEDS = 64, DEFAULT_LEDS = 8;
 const HAP_SETUP_ID = "LAMP";   // homeSpan.setQRID(...)
 const HAP_CATEGORY = 5;        // Category::Lighting
@@ -74,6 +80,7 @@ const state = {
   leds: DEFAULT_LEDS,
   slots: [...DEFAULT_SLOT_FX],
   slotHues: TRIGGER_SLOTS.map(() => DEFAULT_SLOT_HUE),
+  txPower: 0,
   deviceColorFx: null, // какие эффекты с цветом (из прошивки); null — берём из EFFECTS_INFO
   codeMode: "random",
   randomCode: "",
@@ -338,6 +345,22 @@ function renderColorRow(el, i) {
     renderTilesSummary();
     markPreviewsDirty();
   }));
+}
+
+/* ─── Шаг 3: мощность Wi‑Fi ─────────────────────────────────────── */
+function txpLabel(v) {
+  if (v === 0) return t("txp.auto");
+  const dbm = (v / 4).toLocaleString(lang === "ru" ? "ru-RU" : "en-US", { maximumFractionDigits: 2 }).replace("-", "−");
+  if (v === TX_POWER_RECOMMENDED) return t("txp.recommended", { v: dbm });
+  if (v === Math.min(...TX_POWER_OPTIONS)) return t("txp.min", { v: dbm });
+  return t("txp.value", { v: dbm });
+}
+function renderTxp() {
+  const sel = $("#txp");
+  const values = TX_POWER_OPTIONS.includes(state.txPower) ? TX_POWER_OPTIONS : [...TX_POWER_OPTIONS, state.txPower];
+  sel.innerHTML = values.map((v) => `<option value="${v}" ${v === state.txPower ? "selected" : ""}>${escapeHtml(txpLabel(v))}</option>`).join("");
+  // Старая прошивка не знает этой настройки
+  $("#txp-needfw").hidden = !(state.device && state.device.txp === undefined && state.txPower !== 0);
 }
 
 function renderSlots() {
@@ -620,6 +643,11 @@ function applyDeviceInfo({ info, fx }) {
   renderSlots();
   renderTilesSummary();
 
+  if (info.txp !== undefined) {
+    state.txPower = Number(info.txp) || 0;
+    if (state.txPower) $("#txp-box").open = true;   // мощность уже снижали — покажем это
+  }
+  renderTxp();
   if (info.ssid) {
     $("#wifi-current").textContent = info.ssid;
     $("#wifi-keep-hint").hidden = false;
@@ -751,6 +779,8 @@ function buildCommands(lampInfo = {}) {
     cmds.push(["ssid", ssid]);
     cmds.push(["pass", $("#pass").value]);
   }
+  // Мощность Wi‑Fi понимает прошивка 4.2+ (она присылает txp=… в ответ на $HELLO)
+  if (lampInfo.txp !== undefined) cmds.push(["txp", String(state.txPower)]);
   const code = currentCode();
   if (code && code !== state.device?.code) cmds.push(["code", code]);
   return cmds;
@@ -995,7 +1025,7 @@ function applyLang(next) {
   lang = next;
   try { localStorage.setItem("lamp-lang", lang); } catch { /* нет доступа */ }
   document.documentElement.lang = lang;
-  document.title = t("meta.title");
+  document.title = t(currentView() === "build" ? "meta.titleBuild" : "meta.title");
   $('meta[name="description"]').setAttribute("content", t("meta.desc"));
   $$("[data-i18n]").forEach((el) => { el.innerHTML = t(el.dataset.i18n); });
   $$("[data-i18n-attr]").forEach((el) => {
@@ -1015,12 +1045,29 @@ function applyLang(next) {
   $$("#stages li").forEach((li) => { li.textContent = t("stage." + li.dataset.stage); });
   if (state.ownCode) validateOwnCode();
   $("#btn-fx-toggle span").textContent = t($("#effects-body").classList.contains("closed") ? "fx.expand" : "fx.collapse");
+  buildPage?.render();
   renderFwInfo();
+  renderTxp();
   renderSlots();
   renderTilesSummary();
   renderFinalCode();
   updateInstallLabel();
   if (!$("#form-errors").hidden) validate();
+}
+
+/* ─── Разделы: Сборка / Прошивка ────────────────────────────────── */
+let buildPage = null;
+const currentView = () => (location.hash === "#build" ? "build" : "install");
+function applyView(scrollTop) {
+  const v = currentView();
+  $$("[data-view]").forEach((el) => { el.hidden = el.dataset.view !== v; });
+  $$("[data-view-link]").forEach((a) => {
+    if (a.dataset.viewLink === v) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
+  });
+  document.title = t(v === "build" ? "meta.titleBuild" : "meta.title");
+  if (scrollTop) window.scrollTo(0, 0);
+  if (v === "install") markPreviewsDirty();
 }
 
 /* ─── Запуск ────────────────────────────────────────────────────── */
@@ -1032,6 +1079,8 @@ function init() {
   }
 
   $$(".lang-switch button").forEach((b) => b.addEventListener("click", () => applyLang(b.dataset.lang)));
+  buildPage = createBuildPage({ t, $, $$, escapeHtml });
+  window.addEventListener("hashchange", () => applyView(true));
 
   $$('input[name="mode"]').forEach((r) => r.addEventListener("change", () => setEffects(r.value === "1")));
   $("#btn-enable-fx").addEventListener("click", () => setEffects(true));
@@ -1051,6 +1100,7 @@ function init() {
   $$('input[name="codemode"]').forEach((r) => r.addEventListener("change", () => setCodeMode(r.value)));
   $("#btn-regen").addEventListener("click", () => { state.randomCode = generateCode(); renderFinalCode(); });
   $("#code-input").addEventListener("input", validateOwnCode);
+  $("#txp").addEventListener("change", (e) => { state.txPower = Number(e.target.value); renderTxp(); });
 
   $$('input[name="action"]').forEach((r) => r.addEventListener("change", updateInstallLabel));
   $("#btn-install").addEventListener("click", install);
@@ -1072,6 +1122,7 @@ function init() {
   setEffects(true);
   setCodeMode("random");
   applyLang(lang);
+  applyView(false);
   loadManifest();
   wakePreviews();
 }

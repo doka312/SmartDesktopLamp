@@ -20,12 +20,17 @@
     <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="30" r="26" fill="var(--glow-core)" opacity=".55"/><path d="M18 30h28L40 12H24z" fill="var(--accent)"/><rect x="30" y="30" width="4" height="20" fill="var(--wood)"/><rect x="20" y="50" width="24" height="6" rx="3" fill="var(--wood)"/></svg>
     Smart Desktop Lamp
   </span>
+  <nav class="view-switch" data-i18n-attr="aria-label:nav.aria" aria-label="Раздел сайта">
+    <a href="#build" data-view-link="build" data-i18n="nav.build">Сборка</a>
+    <a href="#install" data-view-link="install" data-i18n="nav.install">Прошивка</a>
+  </nav>
   <div class="lang-switch" role="group" data-i18n-attr="aria-label:lang.aria" aria-label="Язык сайта">
     <button type="button" data-lang="ru" aria-pressed="true" lang="ru">RU</button>
     <button type="button" data-lang="en" aria-pressed="false" lang="en">EN</button>
   </div>
 </nav>
 
+<div id="view-install" data-view="install">
 <header class="hero">
   <div class="hero-text">
     <p class="eyebrow" data-i18n="hero.eyebrow">Умная настольная лампа</p>
@@ -70,6 +75,15 @@
 </div>
 
 <main>
+
+  <a class="to-build card soft" href="#build">
+    <span class="to-build-icon" aria-hidden="true">🛠️</span>
+    <span class="to-build-text">
+      <strong data-i18n="toBuild.title">Ещё не собрали лампу?</strong>
+      <span data-i18n="toBuild.text">Пошаговая инструкция по сборке с фотографиями — от проводов кнопки до первого включения.</span>
+    </span>
+    <span class="btn ghost small to-build-btn"><span data-i18n="toBuild.btn">Инструкция по сборке</span> →</span>
+  </a>
 
   <aside class="already card soft">
     <div>
@@ -226,6 +240,20 @@
       <span aria-hidden="true">🔒</span>
       <p data-i18n="wifi.notePrivacy">Пароль уходит прямо в&nbsp;лампу по кабелю. Эта страница его никуда не отправляет и&nbsp;не сохраняет.</p>
     </div>
+
+    <details class="txp-box" id="txp-box">
+      <summary><span data-i18n="txp.summary">Лампа не подключается к Wi‑Fi?</span></summary>
+      <div class="txp-body">
+        <p class="txp-warn" data-i18n="txp.warn"></p>
+        <p class="hint" data-i18n="txp.why"></p>
+        <div class="field">
+          <label for="txp" class="label" data-i18n="txp.label">Мощность передатчика Wi‑Fi</label>
+          <div class="fx-select"><select id="txp"></select></div>
+          <p class="hint" data-i18n="txp.tip"></p>
+          <p class="fx-colors-note" id="txp-needfw" hidden data-i18n="txp.needFw"></p>
+        </div>
+      </div>
+    </details>
   </section>
 
   <!-- ШАГ 4 -->
@@ -358,12 +386,60 @@
     <h2 data-i18n="faq.title">Если что-то не получилось</h2>
     <details><summary data-i18n="faq.q1">Лампы нет в списке, когда браузер просит выбрать устройство</summary><p data-i18n="faq.a1"></p></details>
     <details><summary data-i18n="faq.q2">Лампа не подключается к Wi‑Fi</summary><p data-i18n="faq.a2"></p></details>
+    <details><summary data-i18n="faq.q7">Плата постоянно перезагружается, когда её подключают к компьютеру</summary><p data-i18n="faq.a7"></p></details>
     <details><summary data-i18n="faq.q3">Хочу поменять эффекты или Wi‑Fi потом</summary><p data-i18n="faq.a3"></p></details>
     <details><summary data-i18n="faq.q4">Лампа была в «Доме», а я установил прошивку заново</summary><p data-i18n="faq.a4"></p></details>
     <details><summary data-i18n="faq.q5">«Дом» пишет, что аксессуар уже добавлен или не отвечает</summary><p data-i18n="faq.a5"></p></details>
     <details><summary data-i18n="faq.q6">Какой браузер нужен</summary><p data-i18n="faq.a6"></p></details>
   </section>
 </main>
+</div>
+
+<!-- ═══ СБОРКА ═══ -->
+<div id="view-build" data-view="build" hidden>
+  <header class="hero build-hero">
+    <div class="hero-text">
+      <p class="eyebrow" data-i18n="b.eyebrow">Пошаговая инструкция</p>
+      <h1 data-i18n="b.title">Сборка лампы</h1>
+      <p class="lead" data-i18n="b.lead"></p>
+      <ul class="chips">
+        <li><span aria-hidden="true">🧩</span> <span data-i18n="b.chip1">7 этапов</span></li>
+        <li><span aria-hidden="true">🔥</span> <span data-i18n="b.chip2">термоклей</span></li>
+        <li><span aria-hidden="true">✂️</span> <span data-i18n="b.chip3">без пайки</span></li>
+      </ul>
+    </div>
+    <figure class="hero-photo build-hero-photo">
+      <img src="img/build/IMG_6020-sm.jpg" data-i18n-attr="alt:b.photoAlt" alt="" decoding="async">
+    </figure>
+  </header>
+
+  <main>
+    <nav class="stage-nav" id="stage-nav" data-i18n-attr="aria-label:b.stagesAria" aria-label="Этапы сборки"></nav>
+
+    <aside class="build-warn card">
+      <span class="build-warn-icon" aria-hidden="true">⚠️</span>
+      <div>
+        <h2 data-i18n="b.warn.title">Сначала прошивка, потом сборка</h2>
+        <p data-i18n="b.warn.text"></p>
+        <p data-i18n="b.warn.text2"></p>
+        <a class="btn ghost small" href="#install" data-i18n="b.warn.btn">Открыть страницу прошивки</a>
+      </div>
+    </aside>
+
+    <div id="build-stages" class="build-stages"></div>
+  </main>
+</div>
+
+<dialog class="lightbox" id="lightbox">
+  <figure class="lb-figure">
+    <img id="lb-img" alt="">
+    <figcaption id="lb-caption"></figcaption>
+  </figure>
+  <p class="lb-counter" id="lb-counter"></p>
+  <button type="button" class="lb-btn lb-close" id="lb-close" data-i18n-attr="aria-label:lb.close" aria-label="Закрыть">✕</button>
+  <button type="button" class="lb-btn lb-prev" id="lb-prev" data-i18n-attr="aria-label:lb.prev" aria-label="Предыдущее фото">‹</button>
+  <button type="button" class="lb-btn lb-next" id="lb-next" data-i18n-attr="aria-label:lb.next" aria-label="Следующее фото">›</button>
+</dialog>
 
 <footer class="footer">
   <p>Smart Desktop Lamp · <a href="https://github.com/ANDyouNo/SmartDesktopLamp" data-i18n="footer.src">исходный код на GitHub</a></p>

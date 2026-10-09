@@ -42,6 +42,149 @@ export const T = {
   ],
   "already.btn": ["Загрузить настройки с лампы", "Load settings from the lamp"],
 
+  /* ─── Переключатель разделов / View switch ─── */
+  "nav.aria": ["Раздел сайта", "Site section"],
+  "nav.build": ["Сборка", "Build"],
+  "nav.install": ["Прошивка", "Install"],
+  "meta.titleBuild": ["Сборка лампы", "Building the lamp"],
+  "toBuild.title": ["Ещё не собрали лампу?", "Haven’t built the lamp yet?"],
+  "toBuild.text": [
+    "Пошаговая инструкция по сборке с фотографиями — от проводов кнопки до первого включения.",
+    "A step-by-step build guide with photos, from wiring the button to the first switch-on.",
+  ],
+  "toBuild.btn": ["Инструкция по сборке", "Build guide"],
+
+  /* ─── Сборка / Build ─── */
+  "b.eyebrow": ["Пошаговая инструкция", "Step-by-step guide"],
+  "b.title": ["Сборка лампы", "Building the lamp"],
+  "b.lead": [
+    "Соберите лампу по фотографиям: от подключения сенсорной кнопки до первого включения в&nbsp;«Доме». Любое фото можно открыть крупно.",
+    "Build the lamp by following the photos: from wiring the touch button to switching it on in the Home app. Tap any photo to see it larger.",
+  ],
+  "b.chip1": ["7 этапов", "7 stages"],
+  "b.chip2": ["термоклей", "hot glue"],
+  "b.chip3": ["без пайки", "no soldering"],
+  "b.photoAlt": ["Собранная лампа светится красным", "The assembled lamp glowing red"],
+  "b.stagesAria": ["Этапы сборки", "Build stages"],
+
+  "b.warn.title": ["Сначала прошивка, потом сборка", "Install the firmware first, then assemble"],
+  "b.warn.text": [
+    "На некоторых платах с завода стоит прошивка, из-за которой плата начинает перезапускаться, когда её подключают к компьютеру. Поэтому лучше <b>сначала установить прошивку, а потом собирать лампу</b>. Зажмите на плате кнопку <b>BOOT</b>, подключите плату к компьютеру, подержите кнопку секунду и отпустите — дальше всё как обычно.",
+    "Some boards ship with firmware that makes them restart over and over when connected to a computer. That’s why it’s best to <b>install the firmware first and assemble the lamp afterwards</b>. Hold the <b>BOOT</b> button on the board, plug it into the computer, keep holding for a second and release, then carry on as usual.",
+  ],
+  "b.warn.text2": [
+    "Если лампа уже собрана и плата перезапускается, отключайте и снова подключайте её и пробуйте установить прошивку, пока не получится. Решения других известных проблем — на странице «Прошивка».",
+    "If the lamp is already assembled and the board keeps restarting, unplug and replug it and keep trying to install the firmware until it works. Fixes for other known problems are on the “Install” page.",
+  ],
+  "b.warn.btn": ["Открыть страницу прошивки", "Open the install page"],
+
+  "b.s1.title": ["Что понадобится", "What you need"],
+  "b.s1.text": [
+    "Проверьте, что всё под рукой, прежде чем начинать.",
+    "Make sure you have everything at hand before you start.",
+  ],
+  "b.parts.title": ["Список", "Checklist"],
+  "b.part.1": ["Плата <b>ESP32‑C3</b> (SuperMini или похожая)", "<b>ESP32‑C3</b> board (SuperMini or similar)"],
+  "b.part.2": ["Модуль адресных светодиодов <b>WS2812B</b>", "<b>WS2812B</b> addressable LED module"],
+  "b.part.3": ["<b>Сенсорная кнопка</b>", "<b>Touch button</b>"],
+  "b.part.4": ["Корпус: рассеиватель, крышка и основание", "Lamp body: diffuser, lid and base"],
+  "b.part.5": ["Провода с наконечниками", "Wires with connectors"],
+  "b.part.6": ["Термоклей и клеевой пистолет", "Hot glue and a glue gun"],
+  "b.IMG_5996": ["Все электронные компоненты.", "All the electronic components."],
+
+  "b.s2.title": ["Сенсорная кнопка", "Touch button"],
+  "b.IMG_5998": [
+    "Подключите провода к кнопке. Запомните цвета проводов и названия выводов, а лучше сфотографируйте.",
+    "Connect the wires to the button. Note the wire colors and pin names, or better, take a photo.",
+  ],
+  "b.IMG_5999": [
+    "По очереди проденьте провода от кнопки в специальный канал. Должны поместиться все провода.",
+    "Thread the button wires through the special channel one at a time. All of them should fit.",
+  ],
+  "b.IMG_6001": ["Так должно получиться, когда все провода кнопки проведены.", "This is how it should look once all the button wires are through."],
+  "b.IMG_6002": ["Нанесите клей на место установки кнопки.", "Put glue where the button goes."],
+  "b.IMG_6003": ["Приклейте кнопку.", "Glue the button in place."],
+
+  "b.s3.title": ["Светодиодный модуль", "LED module"],
+  "b.IMG_6005": [
+    "Нанесите клей на модуль адресных светодиодов. Когда подключаете провода, тоже запомните их цвета и названия выводов (можно сфотографировать).",
+    "Put glue on the addressable LED module. When connecting its wires, again note the colors and pin names (a photo helps).",
+  ],
+  "b.IMG_6006": ["Приклейте модуль на его место в рассеивателе.", "Stick the module in its place inside the diffuser."],
+  "b.IMG_6007": [
+    "Закройте крышку. Она и без клея держится достаточно прочно, но для надёжности можно добавить немного.",
+    "Close the lid. It holds firmly enough without glue, but you can add a little to be safe.",
+  ],
+  "b.IMG_6008": ["Вид изнутри после того, как крышка закрыта.", "The inside view after closing the lid."],
+
+  "b.s4.title": ["Общий провод GND", "Shared GND wire"],
+  "b.s4.text": [
+    "У кнопки и у светодиодного модуля есть по проводу GND. Их объединяют в один провод, который потом подключается к плате.",
+    "Both the button and the LED module have a GND wire. They are joined into a single wire that later goes to the board.",
+  ],
+  "b.IMG_6009": ["Найдите два провода с пометкой GND и отрежьте у них наконечники.", "Find the two wires marked GND and cut off their connectors."],
+  "b.IMG_6010": [
+    "Зачистите оба провода со стороны компонентов и один из отрезанных наконечников.",
+    "Strip both wires on the component side, plus one of the cut-off connector ends.",
+  ],
+  "b.IMG_6011": ["Скрутите провода вместе.", "Twist the wires together."],
+  "b.IMG_6012": [
+    "Заизолируйте скрутку термоклеем: так она защищена от воздуха и безопасна.",
+    "Insulate the joint with hot glue to protect it from air and keep it safe.",
+  ],
+
+  "b.s5.title": ["Плата ESP32", "ESP32 board"],
+  "b.s5.text": [
+    "Сначала посмотрите на схему: по ней на шаге 5.3 подключаются все провода.",
+    "First look at the diagram: you’ll connect all the wires by it in step 5.3.",
+  ],
+  "b.IMG_6013": ["Примерьте плату ESP32 в основание лампы.", "Test-fit the ESP32 board in the lamp base."],
+  "b.IMG_6014": [
+    "Проверьте, что разъём платы хорошо сел на место и до него легко добраться.",
+    "Check that the board’s USB port sits well in its opening and is easy to reach.",
+  ],
+  "b.IMG_6015": [
+    "Закрепите плату термоклеем. Не заливайте её полностью, но клея должно быть столько, чтобы плата не оторвалась, когда вы подключаете кабель. Подключите все провода по схеме.",
+    "Fix the board with hot glue. Don’t bury it completely, but use enough glue that the board won’t come loose when you plug in the cable. Connect all the wires according to the diagram.",
+  ],
+  "b.scheme": ["Схема подключения", "Wiring diagram"],
+  "b.pins.title": ["Куда что подключать", "What goes where"],
+  "b.pins.part": ["Компонент", "Component"],
+  "b.pins.pin": ["Вывод компонента", "Component pin"],
+  "b.pins.board": ["Контакт платы", "Board pin"],
+  "b.pins.led": ["Светодиоды", "LEDs"],
+  "b.pins.button": ["Кнопка", "Button"],
+  "b.pins.note": [
+    "Названия контактов уточните на своей плате: GPIO — это контакты, подписанные цифрами, а контакты питания на таких платах обычно подписаны <b>G</b> или <b>GND</b>, <b>5V</b> и <b>3.3</b>.",
+    "Check the pin names on your own board: GPIO pins are the numbered ones, and power pins on these boards are usually labelled <b>G</b> or <b>GND</b>, <b>5V</b> and <b>3.3</b>.",
+  ],
+  "b.IMG_6016": ["Прикрепите рассеиватель к основанию. Лампа готова к прошивке!", "Attach the diffuser to the base. The lamp is ready for its firmware!"],
+
+  "b.s6.title": ["Установка прошивки", "Installing the firmware"],
+  "b.s6.text": [
+    "Дальше следуйте инструкции на странице «Прошивка»: подключите лампу к компьютеру и нажмите одну кнопку.",
+    "Next, follow the guide on the “Install” page: connect the lamp to your computer and press one button.",
+  ],
+  "b.s6.btn": ["Перейти к прошивке", "Go to the install page"],
+
+  "b.s7.title": ["Добавление в «Дом»", "Adding to the Home app"],
+  "b.IMG_6017": [
+    "После прошивки вы получите QR‑код для подключения лампы. Откройте приложение «Дом», нажмите «+» → «Добавить аксессуар» и отсканируйте QR‑код на экране.",
+    "After installing the firmware you’ll get a QR code for the lamp. Open the Home app, tap + → Add Accessory and scan the QR code on the screen.",
+  ],
+  "b.IMG_6018": [
+    "Добавьте лампу в «Дом» и выберите, где она стоит. Если система спросит про несертифицированный аксессуар, выберите «Все равно добавить».",
+    "Add the lamp to Home and choose its room. If asked about an uncertified accessory, choose Add Anyway.",
+  ],
+  "b.IMG_6020": ["Лампа готова к работе!", "The lamp is ready to go!"],
+  "b.done": ["Поздравляем, вы справились! 🎉", "Congratulations, you did it! 🎉"],
+
+  "lb.close": ["Закрыть", "Close"],
+  "lb.prev": ["Предыдущее фото", "Previous photo"],
+  "lb.next": ["Следующее фото", "Next photo"],
+  "lb.counter": ["Шаг {step} · фото {n} из {total}", "Step {step} · photo {n} of {total}"],
+  "lb.open": ["Открыть фото крупно", "Open photo full size"],
+
   /* ─── Шаг 1 / Step 1 ─── */
   "s1.title": ["Какой будет ваша лампа", "How should your lamp work"],
   "s1.hint": ["Режим можно поменять в любой момент, снова зайдя на эту страницу.", "You can change this any time by coming back to this page."],
@@ -129,6 +272,29 @@ export const T = {
   "wifi.notePrivacy": [
     "Пароль уходит прямо в&nbsp;лампу по кабелю. Эта страница его никуда не отправляет и&nbsp;не сохраняет.",
     "The password goes straight to the lamp over the cable. This page never sends or stores it anywhere.",
+  ],
+
+  "txp.summary": ["Лампа не подключается к Wi‑Fi?", "Lamp won’t connect to Wi‑Fi?"],
+  "txp.warn": [
+    "Меняйте эту настройку, <b>только если у платы есть проблемы с подключением к Wi‑Fi</b>. Если лампа подключается нормально, оставьте «Автоматически».",
+    "Change this <b>only if your board has trouble connecting to Wi‑Fi</b>. If the lamp connects fine, leave it on “Automatic”.",
+  ],
+  "txp.why": [
+    "У некоторых дешёвых плат ESP32‑C3 (например, SuperMini) стабилизатор питания не выдерживает пиковый ток при передаче на полной мощности. В момент подключения к роутеру питание проседает, и лампа бесконечно пытается подключиться — с любой сетью. Снижение мощности передатчика решает проблему, а лампе в комнате этой мощности хватает с запасом.",
+    "Some cheap ESP32‑C3 boards (such as the SuperMini) have a voltage regulator that can’t handle the peak current of transmitting at full power. When the lamp tries to join the router, the supply dips and it keeps retrying forever, on any network. Lowering the transmit power fixes this, and it’s still plenty for a lamp in the same room.",
+  ],
+  "txp.label": ["Мощность передатчика Wi‑Fi", "Wi‑Fi transmit power"],
+  "txp.auto": ["Автоматически (максимум платы, 19,5 дБм)", "Automatic (board maximum, 19.5 dBm)"],
+  "txp.value": ["{v} дБм", "{v} dBm"],
+  "txp.recommended": ["{v} дБм — помогает большинству плат", "{v} dBm — fixes most boards"],
+  "txp.min": ["{v} дБм — минимум", "{v} dBm — minimum"],
+  "txp.tip": [
+    "Начните с 8,5&nbsp;дБм. Если лампа всё равно не подключается, попробуйте 5 или 2&nbsp;дБм. Чем ниже мощность, тем ближе к роутеру должна стоять лампа.",
+    "Start with 8.5&nbsp;dBm. If the lamp still can’t connect, try 5 or 2&nbsp;dBm. The lower the power, the closer to the router the lamp should be.",
+  ],
+  "txp.needFw": [
+    "Эта настройка заработает после установки новой прошивки (шаг 5, «Установить прошивку и настройки»).",
+    "This setting starts working after installing the new firmware (step 5, “Install firmware and settings”).",
   ],
 
   /* ─── Шаг 4 / Step 4 ─── */
@@ -295,8 +461,13 @@ export const T = {
   ],
   "faq.q2": ["Лампа не подключается к Wi‑Fi", "The lamp won’t join Wi‑Fi"],
   "faq.a2": [
-    "Проверьте, что сеть работает на&nbsp;2,4&nbsp;ГГц, а&nbsp;название и&nbsp;пароль введены точно, с&nbsp;учётом больших и&nbsp;маленьких букв. Исправить легко: выберите «Только обновить настройки» и&nbsp;введите данные ещё раз.",
-    "Make sure the network is 2.4&nbsp;GHz and the name and password are exactly right, including upper and lower case. It’s easy to fix: choose “Only update settings” and enter them again.",
+    "Проверьте, что сеть работает на&nbsp;2,4&nbsp;ГГц, а&nbsp;название и&nbsp;пароль введены точно, с&nbsp;учётом больших и&nbsp;маленьких букв. Исправить легко: выберите «Только обновить настройки» и&nbsp;введите данные ещё раз. Если всё введено верно, а&nbsp;лампа всё равно не подключается, откройте в&nbsp;шаге&nbsp;3 блок «Лампа не подключается к&nbsp;Wi‑Fi?» и&nbsp;снизьте мощность передатчика.",
+    "Make sure the network is 2.4&nbsp;GHz and the name and password are exactly right, including upper and lower case. It’s easy to fix: choose “Only update settings” and enter them again. If everything is correct and the lamp still won’t connect, open “Lamp won’t connect to Wi‑Fi?” in step&nbsp;3 and lower the transmit power.",
+  ],
+  "faq.q7": ["Плата постоянно перезагружается, когда её подключают к компьютеру", "The board keeps restarting when connected to the computer"],
+  "faq.a7": [
+    "На некоторых платах с завода стоит прошивка, из-за которой плата перезапускается по кругу. Поэтому лучше сначала установить прошивку, а потом собирать лампу. Зажмите на плате кнопку <b>BOOT</b>, подключите кабель к компьютеру, подержите кнопку секунду и отпустите, дальше всё как обычно. Если лампа уже собрана, отключайте и снова подключайте её и пробуйте установить прошивку, пока не получится.",
+    "Some boards ship with firmware that makes them restart in a loop. That’s why it’s best to install the firmware before assembling the lamp. Hold the <b>BOOT</b> button on the board, plug the cable into the computer, keep holding for a second and release; then continue as usual. If the lamp is already assembled, unplug and replug it and keep trying to install until it works.",
   ],
   "faq.q3": ["Хочу поменять эффекты или Wi‑Fi потом", "I want to change effects or Wi‑Fi later"],
   "faq.a3": [
