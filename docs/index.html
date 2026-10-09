@@ -426,6 +426,46 @@
       </div>
     </aside>
 
+    <details class="model-box card" id="model-box">
+      <summary>
+        <span class="model-sum-icon" aria-hidden="true">🧊</span>
+        <span class="model-sum-text">
+          <strong data-i18n="m.title">3D‑модель корпуса</strong>
+          <span data-i18n="m.sub">Посмотрите детали со всех сторон и скачайте файлы для 3D‑печати</span>
+        </span>
+        <svg class="model-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 6l4.5 4.5L12.5 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="model-body">
+        <div class="model-viewer">
+          <canvas id="model-canvas" data-i18n-attr="aria-label:m.canvasAria" aria-label="3D‑модель лампы" role="img"></canvas>
+          <p class="model-loading" id="model-loading" hidden></p>
+          <div class="model-toolbar">
+            <button type="button" class="btn ghost small" id="m-explode" aria-pressed="false">Разобрать</button>
+            <button type="button" class="btn ghost small" id="m-light" aria-pressed="false">Включить свет</button>
+            <button type="button" class="btn ghost small m-icon-btn" id="m-reset" data-i18n-attr="aria-label:m.reset;title:m.reset" aria-label="Вид по умолчанию" title="Вид по умолчанию">↺</button>
+          </div>
+          <p class="model-hint" data-i18n="m.hint">Вращайте мышью или пальцем, колесо или два пальца — приблизить</p>
+        </div>
+        <div class="model-side">
+          <h3 data-i18n="m.parts">Детали</h3>
+          <ul class="model-parts" id="model-parts"></ul>
+          <h3 data-i18n="m.files">Файлы для печати</h3>
+          <div class="model-files">
+            <a class="file-card" id="model-3mf" href="models/lamp-mini-v2.3mf" download="lamp mini v2.3mf">
+              <span class="file-icon" aria-hidden="true">🖨️</span>
+              <span><b data-i18n="m.3mf">Проект для Bambu Studio</b><small data-i18n="m.3mfSub">.3mf — все детали и настройки печати</small></span>
+              <span class="file-arrow" aria-hidden="true">↓</span>
+            </a>
+            <a class="file-card" id="model-mw" href="https://makerworld.com/ru/models/1985869-desktop-lamp#profileId-2136771" target="_blank" rel="noopener">
+              <span class="file-icon" aria-hidden="true">🌐</span>
+              <span><b data-i18n="m.mw">Открыть на MakerWorld</b><small data-i18n="m.mwSub">Модель, профили печати и отзывы</small></span>
+              <span class="file-arrow" aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </details>
+
     <div id="build-stages" class="build-stages"></div>
   </main>
 </div>

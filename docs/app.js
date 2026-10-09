@@ -2,6 +2,7 @@ import { ESPLoader, Transport } from "./vendor/esptool-js-0.7.0.js";
 import qrcode from "./vendor/qrcode-generator-2.0.4.mjs";
 import { T, LANGS } from "./i18n.js";
 import { createBuildPage } from "./build.js";
+import { createModelViewer } from "./model3d.js";
 
 /* ═══════════════════════════════════════════════════════════════════
    ОБЩИЕ С ПРОШИВКОЙ НАСТРОЙКИ
@@ -1046,6 +1047,7 @@ function applyLang(next) {
   if (state.ownCode) validateOwnCode();
   $("#btn-fx-toggle span").textContent = t($("#effects-body").classList.contains("closed") ? "fx.expand" : "fx.collapse");
   buildPage?.render();
+  modelViewer?.render();
   renderFwInfo();
   renderTxp();
   renderSlots();
@@ -1057,6 +1059,7 @@ function applyLang(next) {
 
 /* ─── Разделы: Сборка / Прошивка ────────────────────────────────── */
 let buildPage = null;
+let modelViewer = null;
 const currentView = () => (location.hash === "#build" ? "build" : "install");
 function applyView(scrollTop) {
   const v = currentView();
@@ -1080,6 +1083,7 @@ function init() {
 
   $$(".lang-switch button").forEach((b) => b.addEventListener("click", () => applyLang(b.dataset.lang)));
   buildPage = createBuildPage({ t, $, $$, escapeHtml });
+  modelViewer = createModelViewer({ t, $, $$, escapeHtml, getLang: () => lang });
   window.addEventListener("hashchange", () => applyView(true));
 
   $$('input[name="mode"]').forEach((r) => r.addEventListener("change", () => setEffects(r.value === "1")));
