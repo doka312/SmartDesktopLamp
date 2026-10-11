@@ -300,11 +300,21 @@
       </div>
     </div>
 
+    <div class="install-howto">
     <ol class="checklist">
       <li data-i18n="s5.check1">Подключите лампу к&nbsp;компьютеру USB‑кабелем. Кабель должен передавать данные: некоторые кабели от зарядок умеют только заряжать.</li>
       <li data-i18n="s5.check2">Нажмите большую кнопку ниже. Браузер покажет окно со списком: выберите в&nbsp;нём <b>USB JTAG/serial debug unit</b> (или похожее) и&nbsp;нажмите <b>«Подключиться»</b>.</li>
       <li data-i18n="s5.check3">Не отключайте кабель, пока не появится надпись «Готово».</li>
     </ol>
+    <figure class="port-shot">
+      <img src="img/chrome-port.png" data-i18n-attr="alt:s5.portAlt" alt="Окно Chrome с выбором устройства: USB JTAG/serial debug unit" loading="lazy" decoding="async">
+      <figcaption data-i18n="s5.portCaption">Так выглядит окно выбора: лампа называется <b>USB JTAG/serial debug unit</b>.</figcaption>
+    </figure>
+    </div>
+    <div class="note port-note">
+      <span aria-hidden="true">👀</span>
+      <p data-i18n="s5.portNote"></p>
+    </div>
 
     <div class="install-choice" role="radiogroup" data-i18n-attr="aria-label:act.aria" aria-label="Что сделать">
       <label class="choice">
@@ -426,6 +436,24 @@
       </div>
     </aside>
 
+    <details class="model-box comp-box card" id="components-box">
+      <summary>
+        <span class="model-sum-icon" aria-hidden="true">🛒</span>
+        <span class="model-sum-text">
+          <strong data-i18n="c.title">Компоненты: где купить</strong>
+          <span data-i18n="c.sub">Вся электроника для лампы со ссылками на AliExpress</span>
+        </span>
+        <svg class="model-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 6l4.5 4.5L12.5 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="comp-body">
+        <ul class="comp-list" id="components-list"></ul>
+        <div class="comp-notes">
+          <div class="note"><span aria-hidden="true">🔍</span><p data-i18n="c.search"></p></div>
+          <div class="note"><span aria-hidden="true">🔧</span><p data-i18n="c.solder"></p></div>
+        </div>
+      </div>
+    </details>
+
     <details class="model-box card" id="model-box">
       <summary>
         <span class="model-sum-icon" aria-hidden="true">🧊</span>
@@ -482,7 +510,7 @@
 </dialog>
 
 <footer class="footer">
-  <p>Smart Desktop Lamp · <a href="https://github.com/ANDyouNo/SmartDesktopLamp" data-i18n="footer.src">исходный код на GitHub</a></p>
+  <p>Smart Desktop Lamp · <a href="https://github.com/doka312/SmartDesktopLamp" data-i18n="footer.src">исходный код на GitHub</a></p>
   <p class="muted" id="footer-fw"></p>
 </footer>
 

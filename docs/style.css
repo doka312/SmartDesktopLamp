@@ -436,6 +436,12 @@ input.invalid { border-color: var(--err); }
 
 /* ─── Установка ──────────────────────────────────────────────── */
 .checklist { margin: 0; padding-left: 24px; display: grid; gap: 8px; }
+.install-howto { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.port-shot { margin: 0; display: grid; gap: 8px; }
+.port-shot img { width: 100%; height: auto; display: block; border-radius: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.15), 0 12px 28px -14px rgba(60,35,15,.5); }
+.port-shot figcaption { font-size: 14px; color: var(--ink-soft); }
+.note.port-note { background: var(--warn-soft); }
+@media (max-width: 760px) { .install-howto { grid-template-columns: 1fr; } .port-shot { max-width: 460px; } }
 .checklist li::marker { font-weight: 900; color: var(--accent-strong); }
 .install-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .choice { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border: 2px solid var(--line); border-radius: 16px; cursor: pointer; background: var(--bg); }
@@ -782,4 +788,37 @@ a.btn { text-decoration: none; display: inline-block; text-align: center; }
   .model-box > summary { padding: 16px 18px; }
   .model-body { padding: 16px 16px 18px; }
   .model-viewer { aspect-ratio: 1 / 1.05; }
+}
+
+/* ═══ Компоненты: где купить ═══════════════════════════════════ */
+.comp-body { display: grid; gap: 16px; padding: 22px 24px 24px; border-top: 1px solid var(--line); }
+.comp-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+.comp-card {
+  display: grid; grid-template-rows: auto 1fr auto; gap: 12px;
+  background: var(--card-soft); border: 1px solid var(--line); border-radius: 18px; padding: 12px;
+}
+.comp-photo { display: block; border-radius: 12px; overflow: hidden; background: #fff; aspect-ratio: 1; cursor: zoom-in; }
+.comp-photo img { width: 100%; height: 100%; object-fit: contain; display: block; transition: transform .3s; }
+.comp-photo:hover img { transform: scale(1.03); }
+.comp-photo:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.comp-info { display: grid; gap: 6px; align-content: start; }
+.comp-info h3 { font-size: 17px; }
+.comp-info p { font-size: 14.5px; color: var(--ink-soft); }
+.comp-price { justify-self: start; font-size: 13px; font-weight: 800; padding: 3px 10px; border-radius: 10px; }
+.price-fair { background: var(--accent-soft); color: var(--accent-strong); }
+.price-cheap { background: var(--ok-soft); color: var(--ok); }
+.comp-buy { justify-self: stretch; text-align: center; white-space: nowrap; }
+.comp-notes { display: grid; gap: 10px; }
+@media (max-width: 640px) {
+  .comp-body { padding: 16px; }
+  .comp-list { grid-template-columns: 1fr; gap: 12px; }
+  .comp-card {
+    grid-template-columns: 104px 1fr; grid-template-rows: auto auto;
+    grid-template-areas: "photo info" "photo buy"; column-gap: 14px; row-gap: 10px; padding: 10px;
+  }
+  .comp-photo { grid-area: photo; align-self: start; }
+  .comp-info { grid-area: info; }
+  .comp-buy { grid-area: buy; justify-self: start; }
+  .comp-info h3 { font-size: 16px; }
+  .comp-info p { font-size: 14px; }
 }

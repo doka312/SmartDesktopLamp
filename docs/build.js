@@ -25,6 +25,15 @@ const PINS = [
   { part: "b.pins.button", pin: "I/O (OUT, SIG)", board: "GPIO 4", color: "#E8C93A" },
 ];
 
+// Компоненты для раскрывающегося раздела «Компоненты: где купить».
+// Фото: docs/img/components/<img>.jpg и <img>-sm.jpg; тексты: c.<id>.name / c.<id>.desc в i18n.js
+const COMPONENTS = [
+  { id: "led",    img: "led",     url: "https://ali.click/b4lln1y", price: "fair" },
+  { id: "esp",    img: "esp32c3", url: "https://ali.click/lenln1r", price: "fair" },
+  { id: "wires",  img: "wires",   url: "https://ali.click/5knln1v", price: "cheap" },
+  { id: "button", img: "button",  url: "https://ali.click/0snln19", price: "cheap" },
+];
+
 // Список деталей для этапа 1 (ключи в i18n.js: b.part.N)
 const PARTS = ["b.part.1", "b.part.2", "b.part.3", "b.part.4", "b.part.5", "b.part.6"];
 
@@ -76,7 +85,23 @@ export function createBuildPage({ t, $, $$, escapeHtml }) {
     </div>`;
   }
 
+  function renderComponents() {
+    $("#components-list").innerHTML = COMPONENTS.map((c) => `
+      <li class="comp-card">
+        <a class="comp-photo" href="img/components/${c.img}.jpg" target="_blank" rel="noopener" aria-label="${escapeHtml(t("c.photo"))}: ${escapeHtml(stripTags(t(`c.${c.id}.name`)))}">
+          <img src="img/components/${c.img}-sm.jpg" alt="${escapeHtml(stripTags(t(`c.${c.id}.name`)))}" loading="lazy" decoding="async">
+        </a>
+        <div class="comp-info">
+          <h3>${t(`c.${c.id}.name`)}</h3>
+          <p>${t(`c.${c.id}.desc`)}</p>
+          <span class="comp-price price-${c.price}">${t(`c.price.${c.price}`)}</span>
+        </div>
+        <a class="btn ghost small comp-buy" href="${c.url}" target="_blank" rel="noopener sponsored" aria-label="${escapeHtml(t("c.buy"))}: ${escapeHtml(stripTags(t(`c.${c.id}.name`)))}">AliExpress ↗</a>
+      </li>`).join("");
+  }
+
   function render() {
+    renderComponents();
     $("#stage-nav").innerHTML = BUILD_STAGES.map((st) =>
       `<button type="button" class="stage-chip" data-stage="${st.id}"><span>${st.id}</span>${escapeHtml(stripTags(t(`b.s${st.id}.title`)))}</button>`).join("");
 

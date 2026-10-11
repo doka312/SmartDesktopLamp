@@ -12,11 +12,11 @@ import { createModelViewer } from "./model3d.js";
 
 // Цвета-«плитки» из палитры «Дома» (H в градусах, S в процентах) и их скриншоты
 const TRIGGER_SLOTS = [
-  { hue: 352, sat: 3, img: "img/tile-1.png" },
+  { hue: 17,  sat: 7, img: "img/tile-1.png" },
   { hue: 9,   sat: 5, img: "img/tile-2.png" },
-  { hue: 17,  sat: 7, img: "img/tile-3.png" },
+  { hue: 352, sat: 3, img: "img/tile-3.png" },
 ];
-const DEFAULT_SLOT_FX = [1, 2, 3];
+const DEFAULT_SLOT_FX = [3, 2, 1];
 
 // Анимации превью эффектов. id совпадают с таблицей EFFECTS в effects.h.
 // Названия и описания лежат в i18n.js (ключи fx.<id>.name / fx.<id>.desc).

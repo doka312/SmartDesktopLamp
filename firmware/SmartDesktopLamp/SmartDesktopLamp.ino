@@ -14,7 +14,7 @@
 #include <Preferences.h>
 #include "effects.h"
 
-#define FW_VERSION   "4.2.0"
+#define FW_VERSION   "4.2.1"
 
 // Железо — одинаковое у всех
 #define LED_PIN      9
@@ -27,12 +27,15 @@
 // Сайт показывает эти же значения (docs/app.js → TRIGGER_SLOTS).
 #define NUM_SLOTS 3
 struct TriggerColor { float hue; int sat; };
+// Порядок — как на скриншотах на сайте (docs/img/tile-N.png): плитки идут слева
+// направо в палитре «Образец», третья строка сверху.
 static const TriggerColor TRIGGERS[NUM_SLOTS] = {
-  { 352.0f, 3 },   // плитка 1
-  {   9.0f, 5 },   // плитка 2
-  {  17.0f, 7 },   // плитка 3
+  {  17.0f, 7 },   // плитка 1 (3-й столбец, персиковая)
+  {   9.0f, 5 },   // плитка 2 (4-й столбец)
+  { 352.0f, 3 },   // плитка 3 (5-й столбец, почти белая)
 };
-static const uint8_t DEFAULT_SLOT_FX[NUM_SLOTS] = { 1, 2, 3 };
+// По умолчанию как в исходной прошивке: 352° — разноцветные искры, 9° — сияние, 17° — тёплые огоньки
+static const uint8_t DEFAULT_SLOT_FX[NUM_SLOTS] = { 3, 2, 1 };
 static const uint8_t DEFAULT_SLOT_HUE = 115;   // зелёно-бирюзовый — классическое сияние
 
 ////////////////////////////////////////////

@@ -18,7 +18,7 @@ A smart RGB desk lamp with HomeKit integration, featuring smooth color transitio
 
 ## 🌐 Browser installer (recommended)
 
-The easiest way to set up a lamp is the web installer on GitHub Pages: **https://andyouno.github.io/SmartDesktopLamp/**
+The easiest way to set up a lamp is the web installer on GitHub Pages: **https://doka312.github.io/SmartDesktopLamp/**
 
 Open it in Chrome or Edge on a computer, connect the lamp via USB and pick:
 

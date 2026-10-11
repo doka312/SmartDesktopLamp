@@ -80,8 +80,8 @@ export const T = {
 
   "b.s1.title": ["Что понадобится", "What you need"],
   "b.s1.text": [
-    "Проверьте, что всё под рукой, прежде чем начинать.",
-    "Make sure you have everything at hand before you start.",
+    "Проверьте, что всё под рукой, прежде чем начинать. Где купить электронику — в разделе «Компоненты» выше.",
+    "Make sure you have everything at hand before you start. Where to buy the electronics is in “Components” above.",
   ],
   "b.parts.title": ["Список", "Checklist"],
   "b.part.1": ["Плата <b>ESP32‑C3</b> (SuperMini или похожая)", "<b>ESP32‑C3</b> board (SuperMini or similar)"],
@@ -130,7 +130,10 @@ export const T = {
     "Зачистите оба провода со стороны компонентов и один из отрезанных наконечников.",
     "Strip both wires on the component side, plus one of the cut-off connector ends.",
   ],
-  "b.IMG_6011": ["Скрутите провода вместе.", "Twist the wires together."],
+  "b.IMG_6011": [
+    "Скрутите провода вместе. Удобнее сначала скрутить два провода, а&nbsp;потом добавить к&nbsp;ним третий — так советует наш тестовый сборщик.",
+    "Twist the wires together. It’s easier to twist two wires first and then add the third one, as our test builder found.",
+  ],
   "b.IMG_6012": [
     "Заизолируйте скрутку термоклеем: так она защищена от воздуха и безопасна.",
     "Insulate the joint with hot glue to protect it from air and keep it safe.",
@@ -181,6 +184,41 @@ export const T = {
   ],
   "b.IMG_6020": ["Лампа готова к работе!", "The lamp is ready to go!"],
   "b.done": ["Поздравляем, вы справились! 🎉", "Congratulations, you did it! 🎉"],
+
+  "c.title": ["Компоненты: где купить", "Components: where to buy"],
+  "c.sub": ["Вся электроника для лампы со ссылками на AliExpress", "All the electronics for the lamp, with AliExpress links"],
+  "c.buy": ["Купить на AliExpress", "Buy on AliExpress"],
+  "c.photo": ["Открыть фото", "Open photo"],
+  "c.price.fair": ["Адекватная цена: до&nbsp;200&nbsp;₽", "Fair price: up to&nbsp;200&nbsp;₽"],
+  "c.price.cheap": ["Чем дешевле, тем лучше", "The cheaper the better"],
+  "c.led.name": ["Модуль адресных светодиодов", "Addressable LED module"],
+  "c.led.desc": [
+    "Планка со светодиодами WS2812B и кабелем. На модуле по ссылке их 10 — посчитайте на своём и укажите это число на шаге 1 страницы «Прошивка».",
+    "A WS2812B LED strip with a cable. The one at this link has 10 LEDs — count yours and enter the number in step 1 of the Install page.",
+  ],
+  "c.esp.name": ["Плата ESP32‑C3 SuperMini", "ESP32‑C3 SuperMini board"],
+  "c.esp.desc": [
+    "«Мозг» лампы: Wi‑Fi и управление светом. Через её разъём USB‑C лампа питается и прошивается.",
+    "The lamp’s “brain”: Wi‑Fi and light control. Its USB‑C port powers the lamp and is used for the firmware.",
+  ],
+  "c.wires.name": ["Провода «мама — мама»", "Female-to-female jumper wires"],
+  "c.wires.desc": [
+    "Соединительные провода по 20&nbsp;см с разъёмами на обоих концах: ими кнопка и светодиоды подключаются к плате.",
+    "20&nbsp;cm jumper wires with connectors on both ends, used to connect the button and the LEDs to the board.",
+  ],
+  "c.button.name": ["Сенсорная кнопка", "Touch button"],
+  "c.button.desc": [
+    "Приклеивается под крышку и включает или выключает лампу касанием.",
+    "Glued under the lid; turns the lamp on and off with a touch.",
+  ],
+  "c.search": [
+    "<b>Если товара нет по ссылке,</b> воспользуйтесь поиском по картинке на AliExpress: нажмите на фото, чтобы открыть его, сохраните и загрузите в поиск по фото.",
+    "<b>If an item is no longer available,</b> use AliExpress image search: tap the photo to open it, save it and upload it to the image search.",
+  ],
+  "c.solder": [
+    "Если умеете паять, набор можно собрать дешевле.",
+    "If you can solder, you can put the kit together for less.",
+  ],
 
   "m.title": ["3D‑модель корпуса", "3D model of the body"],
   "m.sub": ["Посмотрите детали со всех сторон и скачайте файлы для 3D‑печати", "Look at the parts from every side and download the files for 3D printing"],
@@ -367,8 +405,17 @@ export const T = {
     "Connect the lamp to your computer with a USB cable. It must be a data cable: some charger cables can only charge.",
   ],
   "s5.check2": [
-    "Нажмите большую кнопку ниже. Браузер покажет окно со списком: выберите в&nbsp;нём <b>USB JTAG/serial debug unit</b> (или похожее) и&nbsp;нажмите <b>«Подключиться»</b>.",
+    "Нажмите большую кнопку ниже. Браузер покажет окно со списком: выберите в&nbsp;нём <b>USB JTAG/serial debug unit</b> (или похожее) и&nbsp;нажмите <b>«Подключение»</b>.",
     "Press the big button below. The browser will show a list: choose <b>USB JTAG/serial debug unit</b> (or similar) and click <b>Connect</b>.",
+  ],
+  "s5.portAlt": ["Окно Chrome с выбором устройства: USB JTAG/serial debug unit", "Chrome’s device picker showing USB JTAG/serial debug unit"],
+  "s5.portCaption": [
+    "Так выглядит окно выбора: лампа называется <b>USB JTAG/serial debug unit</b>.",
+    "This is the picker: the lamp shows up as <b>USB JTAG/serial debug unit</b>.",
+  ],
+  "s5.portNote": [
+    "<b>Будьте внимательны, если в списке несколько устройств.</b> Выберите именно лампу — иначе прошивка не запишется или уйдёт не туда. Если не уверены, какое из них лампа: закройте окно, отключите лампу, снова нажмите кнопку и посмотрите, какое устройство пропало из списка. Потом подключите лампу обратно и выберите его.",
+    "<b>Be careful if the list shows several devices.</b> Pick the lamp itself, otherwise the firmware won’t be written or will go to the wrong device. Not sure which one it is? Close the window, unplug the lamp, press the button again and see which device disappeared from the list. Then plug the lamp back in and choose that one.",
   ],
   "s5.check3": ["Не отключайте кабель, пока не появится надпись «Готово».", "Keep the cable plugged in until you see “Done”."],
   "act.aria": ["Что сделать", "What to do"],
